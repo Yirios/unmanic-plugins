@@ -135,7 +135,7 @@ jobs:
       run: echo 'true' > success_file.txt
     - name: Upload success file
       if: success()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: success_file
         path: success_file.txt
@@ -193,13 +193,13 @@ jobs:
     # Setup python environment
     - name: Set up Python 3.8
       if: success()
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v3
       with:
         python-version: 3.8
 
     # Setup node environment
     - name: Set up node 16
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v3
       with:
         node-version: '16'
 
