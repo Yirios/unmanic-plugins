@@ -6,7 +6,7 @@
     ],
     "description": "Transcode to acc and 1080p",
     "icon": "https://raw.githubusercontent.com/Unmanic/plugin.video_transcoder/master/icon.png",
-    "id": "transcode_to_acc_and_1080p",
+    "id": "better_network_streaming",
     "name": "Transcode to acc and 1080p",
     "platform": [
         "all"
@@ -15,6 +15,6 @@
         "on_library_management_file_test": 99,
         "on_worker_process": 1
     },
-    "tags": "subtitle,ffmpeg",
+    "tags": "subtitle,yiriso,ffmpeg",
     "version": "0.0.1"
 }
