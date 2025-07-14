@@ -61,80 +61,8 @@ class Settings(PluginSettings):
 
     """
     settings = {
-        "Change Resolution": False,
-        "scale=": "w=1920:h=-1",
-        "Change FPS": False,
-        "fps=": "fps=30",
-        "Crop Window": False,
-        "crop=": "1920:804:0:138",
-        "Container": ".mp4",
-        "Encoder Quality Preset": "veryslow",
-        "Copy Audio": True,
+        "Run": True
     }
-
-    form_settings = {
-        "Encoder Quality Preset": {
-            "input_type":     "select",
-            "select_options": [
-                {
-                    'value': "fast",
-                    'label': "fast",
-                },
-                {
-                    'value': "medium",
-                    'label': "medium",
-                },
-                {
-                    'value': "slow",
-                    'label': "slow",
-                },
-                {
-                    'value': "veryslow",
-                    'label': "veryslow",
-                },
-            ],
-        },
-        "Container":{
-            "input_type":     "select",
-            "select_options": [
-                {
-                    'value': ".mp4",
-                    'label': "mp4",
-                },
-                {
-                    'value': ".mkv",
-                    'label': "mkv",
-                },
-            ],
-        }
-    }
-
-    def __init__(self, *args, **kwargs):
-        super(Settings, self).__init__(*args, **kwargs)
-        self.form_settings = {
-            "scale=":  self.__set_resolution(),
-            "crop=":  self.__set_crop(),
-            "fps=" : self.__set_fps()
-        }
-
-    def __set_resolution(self):
-        values = {}
-        if self.get_setting('Change Resolution'):
-            values["display"] = 'hidden'
-        return values 
-    
-    def __set_fps(self):
-        values = {}
-        if self.get_setting('Change FPS'):
-            values["display"] = 'hidden'
-        return values 
-    
-    def __set_crop(self):
-        values = {}
-        if self.get_setting('Crop Window'):
-            values["display"] = 'hidden'
-        return values 
-
 
 
 def on_worker_process(data):
@@ -154,36 +82,13 @@ def on_worker_process(data):
     """
     settings = Settings(library_id=data.get('library_id'))
 
-    container_extension = settings.get_setting('Container')
-    tmp_file_out = os.path.splitext(data['file_out'])
-    data['file_out'] = tmp_file_out[0] + container_extension
-
-    vf_param = ["-vf", "hqdn3d"]
-    if settings.get_setting("Change Resolution"):
-        vf_param[1] = f"{vf_param[1]},scale={settings.get_setting("scale=")}"
-    if settings.get_setting("Change FPS"):
-        vf_param[1] = f"{vf_param[1]},fps={settings.get_setting("fps=")}"
-    if settings.get_setting("Crop Window"):
-        vf_param[1] = f"{vf_param[1]},crop={settings.get_setting("crop=")}"
-    
-    audio_param = ["-c:a"]
-    if settings.get_setting("Copy Audio"):
-        audio_param.append("copy")
+    if settings.get_setting("Run"):
+        data['exec_command'] = [
+            "ffprobe",
+            "-i", data['file_in']
+        ]
     else:
-        audio_param.extend(
-            ["aac", "-b:a", "192k", "-ac", "2"]
-        )
-
-    data['exec_command'] = [
-        "ffmpeg",
-        "-hide_banner", "-loglevel", "info", "-y",
-        "-i", data['file_in'],
-        *vf_param,
-        "-c:v", "hevc_qsv",
-        "-b:v", "2.5M", "-maxrate", "3M", "-minrate", "2M", "-bufsize", "6M",
-        *audio_param,
-        "-movflags", "+faststart",
-        data['file_out']
-    ]
-
-    return data
+        data['exec_command'] = [
+            "echo",
+            "'pass'"
+        ]

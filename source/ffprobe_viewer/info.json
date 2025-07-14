@@ -1,0 +1,20 @@
+{
+    "author": "Yiriso",
+    "compatibility": [
+        1,
+        2
+    ],
+    "description": "ffprobe viewer",
+    "icon": "https://raw.githubusercontent.com/Unmanic/plugin.video_transcoder/master/icon.png",
+    "id": "ffprobe_viewer",
+    "name": "ffprobe viewer",
+    "platform": [
+        "all"
+    ],
+    "priorities": {
+        "on_library_management_file_test": 99,
+        "on_worker_process": 1
+    },
+    "tags": "subtitle,yiriso,ffprobe",
+    "version": "0.0.1"
+}
