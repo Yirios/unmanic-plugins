@@ -191,7 +191,6 @@ def on_worker_process(data):
     vf_param = ["-vf", "hqdn3d"]
     if settings.get_setting("Change Resolution"):
         scale = settings.get_setting('scale=')
-        print(scale)
         vf_param[1] = f"{vf_param[1]},scale={scale}"
     if settings.get_setting("Change FPS"):
         fps = settings.get_setting('fps=')
@@ -207,17 +206,17 @@ def on_worker_process(data):
         audio_param.extend(
             ["aac", "-b:a", "192k", "-ac", "2"]
         )
-
+    
+    gq = str(settings.get_setting("--global_quality"))
+    mr = str(settings.get_setting("-minrate")) + 'k'
+    bs = str(settings.get_setting("-bufsize")) + 'k'
     data['exec_command'] = [
         "ffmpeg",
         "-hide_banner", "-loglevel", "info", "-y",
         "-i", data['file_in'],
         *vf_param,
         "-c:v", "hevc_qsv",
-        "--global_quality", settings.get_setting("--global_quality"),
-        "-minrate", settings.get_setting("-minrate"),
-        "-bufsize", settings.get_setting("-bufsize"),
-        *audio_param,
+        "--global_quality", gq, "-minrate", mr, "bufsize", bs,
         "-movflags", "+faststart",
         data['file_out']
     ]
