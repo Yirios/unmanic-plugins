@@ -117,19 +117,19 @@ class Settings(PluginSettings):
 
     def __set_resolution(self):
         values = {}
-        if self.get_setting('Change Resolution'):
+        if not self.get_setting('Change Resolution'):
             values["display"] = 'hidden'
-        return values 
+        return values
     
     def __set_fps(self):
         values = {}
-        if self.get_setting('Change FPS'):
+        if not self.get_setting('Change FPS'):
             values["display"] = 'hidden'
         return values 
     
     def __set_crop(self):
         values = {}
-        if self.get_setting('Crop Window'):
+        if not self.get_setting('Crop Window'):
             values["display"] = 'hidden'
         return values 
 
