@@ -67,6 +67,9 @@ class Settings(PluginSettings):
         "fps=": "fps=30",
         "Crop Window": False,
         "crop=": "1920:804:0:138",
+        "--global_quality": 25,
+        "-maxrate": 3000,
+        "-bufsize": 6000,
         "Container": ".mp4",
         "Encoder Quality Preset": "veryslow",
         "Copy Audio": True,
@@ -109,6 +112,35 @@ class Settings(PluginSettings):
                         'label': "mkv",
                     },
                 ],
+            },
+            "--global_quality": {
+                "label": "global_quality",
+                "input_type":     "slider",
+                "slider_options": {
+                    "min":    1,
+                    "max":    51,
+                    "step":   1
+                },
+            },
+            "-maxrate": {
+                "label": "maxrate",
+                "input_type":     "slider",
+                "slider_options": {
+                    "min":    500,
+                    "max":    5000,
+                    "step":   100,
+                    "suffix": "k"
+                },
+            },
+            "-bufsize": {
+                "label": "bufsize",
+                "input_type":     "slider",
+                "slider_options": {
+                    "min":    1000,
+                    "max":    10000,
+                    "step":   100,
+                    "suffix": "k"
+                },
             },
             "scale=":  self.__set_resolution(),
             "crop=":  self.__set_crop(),
@@ -158,11 +190,15 @@ def on_worker_process(data):
 
     vf_param = ["-vf", "hqdn3d"]
     if settings.get_setting("Change Resolution"):
-        vf_param[1] = f"{vf_param[1]},scale={settings.get_setting('scale=')}"
+        scale = settings.get_setting('scale=')
+        print(scale)
+        vf_param[1] = f"{vf_param[1]},scale={scale}"
     if settings.get_setting("Change FPS"):
-        vf_param[1] = f"{vf_param[1]},fps={settings.get_setting('fps=')}"
+        fps = settings.get_setting('fps=')
+        vf_param[1] = f"{vf_param[1]},fps={fps}"
     if settings.get_setting("Crop Window"):
-        vf_param[1] = f"{vf_param[1]},crop={settings.get_setting('crop=')}"
+        crop = settings.get_setting('crop=')
+        vf_param[1] = f"{vf_param[1]},crop={crop}"
     
     audio_param = ["-c:a"]
     if settings.get_setting("Copy Audio"):
@@ -178,7 +214,9 @@ def on_worker_process(data):
         "-i", data['file_in'],
         *vf_param,
         "-c:v", "hevc_qsv",
-        "-b:v", "2.5M", "-maxrate", "3M", "-minrate", "2M", "-bufsize", "6M",
+        "--global_quality", settings.get_setting("--global_quality"),
+        "-minrate", settings.get_setting("-minrate"),
+        "-bufsize", settings.get_setting("-bufsize"),
         *audio_param,
         "-movflags", "+faststart",
         data['file_out']
