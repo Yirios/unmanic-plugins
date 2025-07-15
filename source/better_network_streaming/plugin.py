@@ -71,44 +71,45 @@ class Settings(PluginSettings):
         "Encoder Quality Preset": "veryslow",
         "Copy Audio": True,
     }
+
     def __init__(self, *args, **kwargs):
         super(Settings, self).__init__(*args, **kwargs)
 
         self.form_settings = {
-            # "Encoder Quality Preset": {
-            #     "input_type":     "select",
-            #     "select_options": [
-            #         {
-            #             'value': "fast",
-            #             'label': "fast",
-            #         },
-            #         {
-            #             'value': "medium",
-            #             'label': "medium",
-            #         },
-            #         {
-            #             'value': "slow",
-            #             'label': "slow",
-            #         },
-            #         {
-            #             'value': "veryslow",
-            #             'label': "veryslow",
-            #         },
-            #     ],
-            # },
-            # "Container":{
-            #     "input_type":     "select",
-            #     "select_options": [
-            #         {
-            #             'value': ".mp4",
-            #             'label': "mp4",
-            #         },
-            #         {
-            #             'value': ".mkv",
-            #             'label': "mkv",
-            #         },
-            #     ],
-            # },
+            "Encoder Quality Preset": {
+                "input_type":     "select",
+                "select_options": [
+                    {
+                        'value': "fast",
+                        'label': "fast",
+                    },
+                    {
+                        'value': "medium",
+                        'label': "medium",
+                    },
+                    {
+                        'value': "slow",
+                        'label': "slow",
+                    },
+                    {
+                        'value': "veryslow",
+                        'label': "veryslow",
+                    },
+                ],
+            },
+            "Container":{
+                "input_type":     "select",
+                "select_options": [
+                    {
+                        'value': ".mp4",
+                        'label': "mp4",
+                    },
+                    {
+                        'value': ".mkv",
+                        'label': "mkv",
+                    },
+                ],
+            },
             "scale=":  self.__set_resolution(),
             "crop=":  self.__set_crop(),
             "fps=" : self.__set_fps()
@@ -171,16 +172,16 @@ def on_worker_process(data):
             ["aac", "-b:a", "192k", "-ac", "2"]
         )
 
-    data['exec_command'] = [
-        "ffmpeg",
-        "-hide_banner", "-loglevel", "info", "-y",
-        "-i", data['file_in'],
-        *vf_param,
-        "-c:v", "hevc_qsv",
-        "-b:v", "2.5M", "-maxrate", "3M", "-minrate", "2M", "-bufsize", "6M",
-        *audio_param,
-        "-movflags", "+faststart",
-        data['file_out']
-    ]
+    # data['exec_command'] = [
+    #     "ffmpeg",
+    #     "-hide_banner", "-loglevel", "info", "-y",
+    #     "-i", data['file_in'],
+    #     *vf_param,
+    #     "-c:v", "hevc_qsv",
+    #     "-b:v", "2.5M", "-maxrate", "3M", "-minrate", "2M", "-bufsize", "6M",
+    #     *audio_param,
+    #     "-movflags", "+faststart",
+    #     data['file_out']
+    # ]
 
     return data
