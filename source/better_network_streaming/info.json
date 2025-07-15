@@ -4,10 +4,10 @@
         1,
         2
     ],
-    "description": "Transcode to acc and 1080p",
+    "description": "Better Network Streaming",
     "icon": "https://raw.githubusercontent.com/Unmanic/plugin.video_transcoder/master/icon.png",
     "id": "better_network_streaming",
-    "name": "Transcode to acc and 1080p",
+    "name": "Better Network Streaming",
     "platform": [
         "all"
     ],
@@ -16,5 +16,5 @@
         "on_worker_process": 1
     },
     "tags": "subtitle,yiriso,ffmpeg",
-    "version": "0.0.2"
+    "version": "0.0.1"
 }
