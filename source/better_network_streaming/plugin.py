@@ -158,7 +158,7 @@ def on_worker_process(data):
 
     vf_param = ["-vf", "hqdn3d"]
     if settings.get_setting("Change Resolution"):
-        vf_param[1] = f"{vf_param[1]},scale={settings.get_setting('sale=')}"
+        vf_param[1] = f"{vf_param[1]},scale={settings.get_setting('scale=')}"
     if settings.get_setting("Change FPS"):
         vf_param[1] = f"{vf_param[1]},fps={settings.get_setting('fps=')}"
     if settings.get_setting("Crop Window"):
