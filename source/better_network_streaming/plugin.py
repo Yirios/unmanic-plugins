@@ -60,54 +60,55 @@ class Settings(PluginSettings):
                                         Settings are stored on disk in order to be persistent.
 
     """
+    settings = {
+        "Change Resolution": False,
+        "scale=": "w=1920:h=-1",
+        "Change FPS": False,
+        "fps=": "fps=30",
+        "Crop Window": False,
+        "crop=": "1920:804:0:138",
+        "Container": ".mp4",
+        "Encoder Quality Preset": "veryslow",
+        "Copy Audio": True,
+    }
     def __init__(self, *args, **kwargs):
         super(Settings, self).__init__(*args, **kwargs)
-        self.settings = {
-            "Change Resolution": False,
-            "scale=": "w=1920:h=-1",
-            "Change FPS": False,
-            "fps=": "fps=30",
-            "Crop Window": False,
-            "crop=": "1920:804:0:138",
-            "Container": ".mp4",
-            "Encoder Quality Preset": "veryslow",
-            "Copy Audio": True,
-        }
+
         self.form_settings = {
-            "Encoder Quality Preset": {
-                "input_type":     "select",
-                "select_options": [
-                    {
-                        'value': "fast",
-                        'label': "fast",
-                    },
-                    {
-                        'value': "medium",
-                        'label': "medium",
-                    },
-                    {
-                        'value': "slow",
-                        'label': "slow",
-                    },
-                    {
-                        'value': "veryslow",
-                        'label': "veryslow",
-                    },
-                ],
-            },
-            "Container":{
-                "input_type":     "select",
-                "select_options": [
-                    {
-                        'value': ".mp4",
-                        'label': "mp4",
-                    },
-                    {
-                        'value': ".mkv",
-                        'label': "mkv",
-                    },
-                ],
-            },
+            # "Encoder Quality Preset": {
+            #     "input_type":     "select",
+            #     "select_options": [
+            #         {
+            #             'value': "fast",
+            #             'label': "fast",
+            #         },
+            #         {
+            #             'value': "medium",
+            #             'label': "medium",
+            #         },
+            #         {
+            #             'value': "slow",
+            #             'label': "slow",
+            #         },
+            #         {
+            #             'value': "veryslow",
+            #             'label': "veryslow",
+            #         },
+            #     ],
+            # },
+            # "Container":{
+            #     "input_type":     "select",
+            #     "select_options": [
+            #         {
+            #             'value': ".mp4",
+            #             'label': "mp4",
+            #         },
+            #         {
+            #             'value': ".mkv",
+            #             'label': "mkv",
+            #         },
+            #     ],
+            # },
             "scale=":  self.__set_resolution(),
             "crop=":  self.__set_crop(),
             "fps=" : self.__set_fps()
