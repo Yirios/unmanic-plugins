@@ -216,7 +216,7 @@ def on_worker_process(data):
         "-i", data['file_in'],
         *vf_param,
         "-c:v", "hevc_qsv",
-        "-global_quality", gq, "-maxrate", mr, "bufsize", bs,
+        "-global_quality", gq, "-maxrate", mr, "-bufsize", bs,
         "-movflags", "+faststart",
         data['file_out']
     ]
