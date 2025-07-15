@@ -158,11 +158,11 @@ def on_worker_process(data):
 
     vf_param = ["-vf", "hqdn3d"]
     if settings.get_setting("Change Resolution"):
-        vf_param[1] = f"{vf_param[1]},scale={settings.get_setting("scale=")}"
+        vf_param[1] = f"{vf_param[1]},scale={settings.get_setting('sale=')}"
     if settings.get_setting("Change FPS"):
-        vf_param[1] = f"{vf_param[1]},fps={settings.get_setting("fps=")}"
+        vf_param[1] = f"{vf_param[1]},fps={settings.get_setting('fps=')}"
     if settings.get_setting("Crop Window"):
-        vf_param[1] = f"{vf_param[1]},crop={settings.get_setting("crop=")}"
+        vf_param[1] = f"{vf_param[1]},crop={settings.get_setting('crop=')}"
     
     audio_param = ["-c:a"]
     if settings.get_setting("Copy Audio"):
@@ -172,16 +172,16 @@ def on_worker_process(data):
             ["aac", "-b:a", "192k", "-ac", "2"]
         )
 
-    # data['exec_command'] = [
-    #     "ffmpeg",
-    #     "-hide_banner", "-loglevel", "info", "-y",
-    #     "-i", data['file_in'],
-    #     *vf_param,
-    #     "-c:v", "hevc_qsv",
-    #     "-b:v", "2.5M", "-maxrate", "3M", "-minrate", "2M", "-bufsize", "6M",
-    #     *audio_param,
-    #     "-movflags", "+faststart",
-    #     data['file_out']
-    # ]
+    data['exec_command'] = [
+        "ffmpeg",
+        "-hide_banner", "-loglevel", "info", "-y",
+        "-i", data['file_in'],
+        *vf_param,
+        "-c:v", "hevc_qsv",
+        "-b:v", "2.5M", "-maxrate", "3M", "-minrate", "2M", "-bufsize", "6M",
+        *audio_param,
+        "-movflags", "+faststart",
+        data['file_out']
+    ]
 
     return data
