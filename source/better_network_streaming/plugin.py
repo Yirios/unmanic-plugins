@@ -72,46 +72,43 @@ class Settings(PluginSettings):
         "Copy Audio": True,
     }
 
-    form_settings = {
-        "Encoder Quality Preset": {
-            "input_type":     "select",
-            "select_options": [
-                {
-                    'value': "fast",
-                    'label': "fast",
-                },
-                {
-                    'value': "medium",
-                    'label': "medium",
-                },
-                {
-                    'value': "slow",
-                    'label': "slow",
-                },
-                {
-                    'value': "veryslow",
-                    'label': "veryslow",
-                },
-            ],
-        },
-        "Container":{
-            "input_type":     "select",
-            "select_options": [
-                {
-                    'value': ".mp4",
-                    'label': "mp4",
-                },
-                {
-                    'value': ".mkv",
-                    'label': "mkv",
-                },
-            ],
-        }
-    }
-
     def __init__(self, *args, **kwargs):
         super(Settings, self).__init__(*args, **kwargs)
         self.form_settings = {
+            "Encoder Quality Preset": {
+                "input_type":     "select",
+                "select_options": [
+                    {
+                        'value': "fast",
+                        'label': "fast",
+                    },
+                    {
+                        'value': "medium",
+                        'label': "medium",
+                    },
+                    {
+                        'value': "slow",
+                        'label': "slow",
+                    },
+                    {
+                        'value': "veryslow",
+                        'label': "veryslow",
+                    },
+                ],
+            },
+            "Container":{
+                "input_type":     "select",
+                "select_options": [
+                    {
+                        'value': ".mp4",
+                        'label': "mp4",
+                    },
+                    {
+                        'value': ".mkv",
+                        'label': "mkv",
+                    },
+                ],
+            },
             "scale=":  self.__set_resolution(),
             "crop=":  self.__set_crop(),
             "fps=" : self.__set_fps()

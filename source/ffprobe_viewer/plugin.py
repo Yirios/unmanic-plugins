@@ -89,6 +89,5 @@ def on_worker_process(data):
         ]
     else:
         data['exec_command'] = [
-            "echo",
-            "'pass'"
+            "echo","pass_viewer"
         ]
