@@ -47,23 +47,22 @@ from unmanic.libs.system import System
 
 
 class Settings(PluginSettings):
-    """
-    An object to hold a dictionary of settings accessible to the Plugin
-    class and able to be configured by users from within the Unmanic WebUI.
-
-    This class has a number of methods available to it for accessing these settings:
-
-        > get_setting(<key>)            - Fetch a single setting value. Or leave the 
-                                        key argument empty and return the full dictionary.
-        > set_setting(<key>, <value>)   - Set a singe setting value.
-                                        Used by the Unmanic WebUI to save user settings.
-                                        Settings are stored on disk in order to be persistent.
-
-    """
     settings = {
-        "Run": True
+        'Run': True,
+        "Empty echo":  'pass-viewer',
     }
 
+    def __init__(self, *args, **kwargs):
+        super(Settings, self).__init__(*args, **kwargs)
+        self.form_settings = {
+            "Empty echo":  self.__set_allowed_extensions_form_settings(),
+        }
+
+    def __set_allowed_extensions_form_settings(self):
+        values = {}
+        if self.get_setting('Run'):
+            values["display"] = 'hidden'
+        return values
 
 def on_worker_process(data):
     """
@@ -89,5 +88,5 @@ def on_worker_process(data):
         ]
     else:
         data['exec_command'] = [
-            "echo","pass_viewer"
+            "echo", settings.get_setting("Empty echo")
         ]
