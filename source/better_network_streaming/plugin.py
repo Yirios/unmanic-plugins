@@ -67,7 +67,7 @@ class Settings(PluginSettings):
         "fps=": "fps=30",
         "Crop Window": False,
         "crop=": "1920:804:0:138",
-        "--global_quality": 25,
+        "-global_quality": 25,
         "-maxrate": 3000,
         "-bufsize": 6000,
         "Container": ".mp4",
@@ -113,7 +113,7 @@ class Settings(PluginSettings):
                     },
                 ],
             },
-            "--global_quality": {
+            "-global_quality": {
                 "label": "global_quality",
                 "input_type":     "slider",
                 "slider_options": {
@@ -207,8 +207,8 @@ def on_worker_process(data):
             ["aac", "-b:a", "192k", "-ac", "2"]
         )
     
-    gq = str(settings.get_setting("--global_quality"))
-    mr = str(settings.get_setting("-minrate")) + 'k'
+    gq = str(settings.get_setting("-global_quality"))
+    mr = str(settings.get_setting("-maxrate")) + 'k'
     bs = str(settings.get_setting("-bufsize")) + 'k'
     data['exec_command'] = [
         "ffmpeg",
@@ -216,7 +216,7 @@ def on_worker_process(data):
         "-i", data['file_in'],
         *vf_param,
         "-c:v", "hevc_qsv",
-        "--global_quality", gq, "-minrate", mr, "bufsize", bs,
+        "-global_quality", gq, "-maxrate", mr, "bufsize", bs,
         "-movflags", "+faststart",
         data['file_out']
     ]
