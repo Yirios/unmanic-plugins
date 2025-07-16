@@ -218,6 +218,7 @@ def on_worker_process(data):
         "-c:v", "hevc_nvenc",
         "-preset", settings.get_setting("-preset"), "-rc", "vbr",
         "-cq", cq, "-qmin", qmin, "-qmax", qmax, "-rc-lookahead", lookahead,
+        *audio_param,
         "-movflags", "+faststart",
         data['file_out']
     ]
