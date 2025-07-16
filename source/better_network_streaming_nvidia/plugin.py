@@ -61,10 +61,10 @@ class Settings(PluginSettings):
 
     """
     settings = {
+        "Enable Filter":True,
+        "bilateral_cuda=": "window_size=9:sigmaS=3.0:sigmaR=50.0",
         "Change Resolution": False,
-        "-resize": "1920x1080",
-        "Crop Window": False,
-        "-crop": "138x138x0x0",
+        "scale_cuda=": "1920:-1",
         "-preset": "p7",
         "-cq": 25,
         "-qmin": 25,
@@ -146,23 +146,21 @@ class Settings(PluginSettings):
                     "step":   1
                 },
             },
-            "-resize":  self.__set_resolution(),
-            "-crop":  self.__set_crop(),
+            "scale_cuda=":  self.__show_when("Change Resolution"),
+            "bilateral_cuda=":  self.__show_when("Enable Filter")
         }
 
-    def __set_resolution(self):
+    def __show_when(self, key):
         values = {}
-        if not self.get_setting('Change Resolution'):
+        if not self.get_setting(key):
             values["display"] = 'hidden'
         return values
     
-    def __set_crop(self):
+    def __hidden_when(self, key):
         values = {}
-        if not self.get_setting('Crop Window'):
+        if self.get_setting(key):
             values["display"] = 'hidden'
-        return values 
-
-
+        return values
 
 def on_worker_process(data):
     """
@@ -185,17 +183,19 @@ def on_worker_process(data):
     tmp_file_out = os.path.splitext(data['file_out'])
     data['file_out'] = tmp_file_out[0] + container_extension
 
-    scale_param = []
+    vf_param = []
+    if settings.get_setting("Enable Filter"):
+        vf_param.append(
+            "bilateral_cuda=" + settings.get_setting('bilateral_cuda=')
+        )
     if settings.get_setting("Change Resolution"):
-        scale = settings.get_setting('-resize')
-        scale_param.extend(
-            ["-resize", scale]
+        vf_param.append(
+            "scale_cuda=" + settings.get_setting('scale_cuda=')
         )
-    if settings.get_setting("Crop Window"):
-        crop = settings.get_setting('-crop')
-        scale_param.extend(
-            ["-crop", crop]
-        )
+    if len(vf_param) > 0:
+        vf_param = [
+            "-vf", ",".join(vf_param)
+        ]
     
     audio_param = ["-c:a"]
     if settings.get_setting("Copy Audio"):
@@ -213,8 +213,8 @@ def on_worker_process(data):
         "ffmpeg",
         "-hide_banner", "-loglevel", "info", "-y",
         "-hwaccel", "cuda", "-hwaccel_output_format", "cuda",
-        *scale_param,
         "-i", data['file_in'],
+        *vf_param,
         "-c:v", "hevc_nvenc",
         "-preset", settings.get_setting("-preset"), "-rc", "vbr",
         "-cq", cq, "-qmin", qmin, "-qmax", qmax, "-rc-lookahead", lookahead,
