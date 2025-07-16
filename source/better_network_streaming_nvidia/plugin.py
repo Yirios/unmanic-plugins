@@ -202,7 +202,7 @@ def on_worker_process(data):
         audio_param.append("copy")
     else:
         audio_param.extend(
-            ["aac", "-af", "afftdn", "-b:a", "192k", "-ac", "2"]
+            ["aac", "-af", "highpass=200,lowpass=3000,afftdn", "-b:a", "192k", "-ac", "2"]
         )
     
     cq = str(settings.get_setting("-cq"))
