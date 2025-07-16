@@ -68,11 +68,11 @@ class Settings(PluginSettings):
         "Crop Window": False,
         "crop=": "1920:804:0:138",
         "-global_quality": 25,
+        "Encoder Quality Preset": "veryslow",
         "-maxrate": 3000,
         "-bufsize": 6000,
-        "Container": ".mp4",
-        "Encoder Quality Preset": "veryslow",
         "Copy Audio": True,
+        "Container": ".mp4",
     }
 
     def __init__(self, *args, **kwargs):

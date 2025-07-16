@@ -4,10 +4,10 @@
         1,
         2
     ],
-    "description": "Better Network Streaming",
+    "description": "Better Network Streaming encoding by qsv",
     "icon": "https://raw.githubusercontent.com/Unmanic/plugin.video_transcoder/master/icon.png",
-    "id": "better_network_streaming",
-    "name": "Better Network Streaming",
+    "id": "better_network_streaming_intel",
+    "name": "Better Network Streaming (intel)",
     "platform": [
         "all"
     ],
@@ -16,5 +16,5 @@
         "on_worker_process": 1
     },
     "tags": "subtitle,yiriso,ffmpeg",
-    "version": "0.0.12"
+    "version": "0.1.0"
 }
