@@ -63,10 +63,8 @@ class Settings(PluginSettings):
     settings = {
         "Change Resolution": False,
         "-resize": "1920x1080",
-        # "Change FPS": False,
-        # "fps=": "fps=30",
         "Crop Window": False,
-        "-crop": "138x128x0x0",
+        "-crop": "138x138x0x0",
         "-preset": "p7",
         "-cq": 25,
         "-qmin": 25,
@@ -115,7 +113,7 @@ class Settings(PluginSettings):
                 ],
             },
             "-cq": {
-                "label": "global_quality",
+                "label": "Constant Quality",
                 "input_type":     "slider",
                 "slider_options": {
                     "min":    1,
@@ -140,6 +138,7 @@ class Settings(PluginSettings):
                 },
             },
             "-rc-lookahead": {
+                "label": "lookahead frames",
                 "input_type":     "slider",
                 "slider_options": {
                     "min":    4,
@@ -149,7 +148,6 @@ class Settings(PluginSettings):
             },
             "-resize":  self.__set_resolution(),
             "-crop":  self.__set_crop(),
-            # "fps=" : self.__set_fps()
         }
 
     def __set_resolution(self):
@@ -157,12 +155,6 @@ class Settings(PluginSettings):
         if not self.get_setting('Change Resolution'):
             values["display"] = 'hidden'
         return values
-    
-    def __set_fps(self):
-        values = {}
-        if not self.get_setting('Change FPS'):
-            values["display"] = 'hidden'
-        return values 
     
     def __set_crop(self):
         values = {}
