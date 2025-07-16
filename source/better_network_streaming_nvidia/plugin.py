@@ -65,6 +65,8 @@ class Settings(PluginSettings):
         "bilateral_cuda=": "window_size=9:sigmaS=3.0:sigmaR=50.0",
         "Change Resolution": False,
         "scale_cuda=": "1920:-1",
+        "Crop Window": False,
+        "crop=": "1920:804:0:138",
         "-preset": "p7",
         "-cq": 25,
         "-qmin": 25,
@@ -147,7 +149,8 @@ class Settings(PluginSettings):
                 },
             },
             "scale_cuda=":  self.__show_when("Change Resolution"),
-            "bilateral_cuda=":  self.__show_when("Enable Filter")
+            "bilateral_cuda=":  self.__show_when("Enable Filter"),
+            "crop=": self.__show_when("Crop Window"),
         }
 
     def __show_when(self, key):
@@ -192,6 +195,12 @@ def on_worker_process(data):
         vf_param.append(
             "scale_cuda=" + settings.get_setting('scale_cuda=')
         )
+    if settings.get_setting("Crop Window"):
+        vf_param.append(
+            "hwdownload=extra_hw_frames=64,format=nv12,crop=" + \
+            settings.get_setting('crop=') + \
+            ",hwupload_cuda"
+        )
     if len(vf_param) > 0:
         vf_param = [
             "-vf", ",".join(vf_param)
@@ -204,7 +213,7 @@ def on_worker_process(data):
         audio_param.extend(
             ["aac", "-af", "highpass=200,lowpass=3000,afftdn", "-b:a", "192k", "-ac", "2"]
         )
-    
+
     cq = str(settings.get_setting("-cq"))
     qmin = str(settings.get_setting("-qmin"))
     qmax = str(settings.get_setting("-qmax"))
