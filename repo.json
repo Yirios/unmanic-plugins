@@ -1,0 +1,71 @@
+{
+    "repo": {
+        "id": "repository.yiriso",
+        "name": "Yiriso's unmanic plugins",
+        "icon": "",
+        "repo_data_directory": "https://raw.githubusercontent.com/Yirios/unmanic-plugins/repo/",
+        "repo_data_url": "https://raw.githubusercontent.com/Yirios/unmanic-plugins/repo/repo.json"
+    },
+    "plugins": [
+        {
+            "author": "Yiriso",
+            "compatibility": [
+                1,
+                2
+            ],
+            "description": "Better Network Streaming encoding by QSV",
+            "icon": "https://raw.githubusercontent.com/Unmanic/plugin.video_transcoder/master/icon.png",
+            "id": "better_network_streaming_intel",
+            "name": "Better Network Streaming (intel)",
+            "platform": [
+                "all"
+            ],
+            "priorities": {
+                "on_library_management_file_test": 99,
+                "on_worker_process": 1
+            },
+            "tags": "subtitle,yiriso,ffmpeg",
+            "version": "0.1.1"
+        },
+        {
+            "author": "Yiriso",
+            "compatibility": [
+                1,
+                2
+            ],
+            "description": "Better Network Streaming encoding by NVENC",
+            "icon": "https://raw.githubusercontent.com/Unmanic/plugin.video_transcoder/master/icon.png",
+            "id": "better_network_streaming_nvidia",
+            "name": "Better Network Streaming (nvidia)",
+            "platform": [
+                "all"
+            ],
+            "priorities": {
+                "on_library_management_file_test": 99,
+                "on_worker_process": 1
+            },
+            "tags": "subtitle,yiriso,ffmpeg",
+            "version": "0.1.3"
+        },
+        {
+            "author": "Yiriso",
+            "compatibility": [
+                1,
+                2
+            ],
+            "description": "ffprobe viewer",
+            "icon": "https://raw.githubusercontent.com/Unmanic/plugin.video_transcoder/master/icon.png",
+            "id": "ffprobe_viewer",
+            "name": "ffprobe viewer",
+            "platform": [
+                "all"
+            ],
+            "priorities": {
+                "on_library_management_file_test": 99,
+                "on_worker_process": 1
+            },
+            "tags": "subtitle,yiriso,ffprobe",
+            "version": "0.0.2"
+        }
+    ]
+}
