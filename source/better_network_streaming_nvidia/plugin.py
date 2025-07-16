@@ -217,7 +217,7 @@ def on_worker_process(data):
         "-i", data['file_in'],
         "-c:v", "hevc_nvenc",
         "-preset", settings.get_setting("-preset"), "-rc", "vbr",
-        "-cq", cq, "-qmin", qmin, "-qmx", qmax, "-rc-lookahead", lookahead,
+        "-cq", cq, "-qmin", qmin, "-qmax", qmax, "-rc-lookahead", lookahead,
         "-movflags", "+faststart",
         data['file_out']
     ]
