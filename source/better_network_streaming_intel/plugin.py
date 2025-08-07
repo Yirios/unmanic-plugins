@@ -145,28 +145,23 @@ class Settings(PluginSettings):
                     "suffix": "k"
                 },
             },
-            "scale=":  self.__set_resolution(),
-            "crop=":  self.__set_crop(),
-            "fps=" : self.__set_fps()
+            "hqdn3d=":  self.__show_when("Enable Filter"),
+            "scale=":  self.__show_when("Change Resolution"),
+            "crop=":  self.__show_when("Crop Window"),
+            "fps=" : self.__show_when("Change FPS"),
         }
 
-    def __set_resolution(self):
+    def __show_when(self, key):
         values = {}
-        if not self.get_setting('Change Resolution'):
+        if not self.get_setting(key):
             values["display"] = 'hidden'
         return values
     
-    def __set_fps(self):
+    def __hidden_when(self, key):
         values = {}
-        if not self.get_setting('Change FPS'):
+        if self.get_setting(key):
             values["display"] = 'hidden'
-        return values 
-    
-    def __set_crop(self):
-        values = {}
-        if not self.get_setting('Crop Window'):
-            values["display"] = 'hidden'
-        return values 
+        return values
 
 
 
