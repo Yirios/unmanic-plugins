@@ -65,6 +65,8 @@ class Settings(PluginSettings):
         "bilateral_cuda=": "window_size=9:sigmaS=3.0:sigmaR=50.0",
         "Change Resolution": False,
         "scale_cuda=": "1920:-1",
+        # "Change FPS": False,
+        # "fps=": "fps=30",
         "Crop Window": False,
         "crop=": "1920:804:0:138",
         "-preset": "p7",
@@ -151,6 +153,7 @@ class Settings(PluginSettings):
             "scale_cuda=":  self.__show_when("Change Resolution"),
             "bilateral_cuda=":  self.__show_when("Enable Filter"),
             "crop=": self.__show_when("Crop Window"),
+            # "fps=": self.__show_when("Change FPS"),
         }
 
     def __show_when(self, key):

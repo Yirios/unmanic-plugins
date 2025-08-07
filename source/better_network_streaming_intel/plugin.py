@@ -61,6 +61,8 @@ class Settings(PluginSettings):
 
     """
     settings = {
+        "Enable Filter":True,
+        "hqdn3d=": "luma_spatial=4.0",
         "Change Resolution": False,
         "scale=": "w=1920:h=-1",
         "Change FPS": False,
@@ -72,6 +74,7 @@ class Settings(PluginSettings):
         "-maxrate": 3000,
         "-bufsize": 6000,
         "Copy Audio": True,
+        "Extent":"",
         "Container": ".mp4",
     }
 
@@ -188,17 +191,22 @@ def on_worker_process(data):
     tmp_file_out = os.path.splitext(data['file_out'])
     data['file_out'] = tmp_file_out[0] + container_extension
 
-    vf_param = ["-vf", "hqdn3d"]
+    vf_param = []
+    if settings.get_setting("Enable Filter"):
+        filter_param = settings.get_setting("hqdn3d=")
+        vf_param.append(f"hqdn3d={filter_param}")
     if settings.get_setting("Change Resolution"):
         scale = settings.get_setting('scale=')
-        vf_param[1] = f"{vf_param[1]},scale={scale}"
+        vf_param.append(f"scale={scale}")
     if settings.get_setting("Change FPS"):
         fps = settings.get_setting('fps=')
-        vf_param[1] = f"{vf_param[1]},fps={fps}"
+        vf_param.append(f"fps={fps}")
     if settings.get_setting("Crop Window"):
         crop = settings.get_setting('crop=')
-        vf_param[1] = f"{vf_param[1]},crop={crop}"
-    
+        vf_param.append(f"crop={crop}")
+    if len(vf_param) > 0:
+        vf_param = ["-vf", ",".join(vf_param)]
+        
     audio_param = ["-c:a"]
     if settings.get_setting("Copy Audio"):
         audio_param.append("copy")
@@ -217,6 +225,7 @@ def on_worker_process(data):
         *vf_param,
         "-c:v", "hevc_qsv",
         "-global_quality", gq, "-maxrate", mr, "-bufsize", bs,
+        settings.get_setting("Extent"),
         "-movflags", "+faststart",
         data['file_out']
     ]
