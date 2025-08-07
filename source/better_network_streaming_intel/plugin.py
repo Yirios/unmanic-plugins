@@ -220,7 +220,7 @@ def on_worker_process(data):
         *vf_param,
         "-c:v", "hevc_qsv",
         "-global_quality", gq, "-maxrate", mr, "-bufsize", bs,
-        settings.get_setting("Extent").spilt(" "),
+        *settings.get_setting("Extent").spilt(" "),
         "-movflags", "+faststart",
         data['file_out']
     ]
