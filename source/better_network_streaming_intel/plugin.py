@@ -209,7 +209,7 @@ def on_worker_process(data):
         audio_param.extend(
             ["aac", "-af", "highpass=200,lowpass=3000,afftdn", "-b:a", "192k", "-ac", "2"]
         )
-
+    
     gq = str(settings.get_setting("-global_quality"))
     mr = str(settings.get_setting("-maxrate")) + 'k'
     bs = str(settings.get_setting("-bufsize")) + 'k'
@@ -220,7 +220,7 @@ def on_worker_process(data):
         *vf_param,
         "-c:v", "hevc_qsv",
         "-global_quality", gq, "-maxrate", mr, "-bufsize", bs,
-        *settings.get_setting("Extent").spilt(" "),
+        *settings.get_setting("Extent").split(),
         "-movflags", "+faststart",
         data['file_out']
     ]
