@@ -74,7 +74,7 @@ class Settings(PluginSettings):
         "-maxrate": 3000,
         "-bufsize": 6000,
         "Copy Audio": True,
-        "Extent":"",
+        "Extend":"",
         "Container": ".mp4",
     }
 
@@ -213,6 +213,7 @@ def on_worker_process(data):
     gq = str(settings.get_setting("-global_quality"))
     mr = str(settings.get_setting("-maxrate")) + 'k'
     bs = str(settings.get_setting("-bufsize")) + 'k'
+    extend = settings.get_setting("Extend").split()
     data['exec_command'] = [
         "ffmpeg",
         "-hide_banner", "-loglevel", "info", "-y",
@@ -220,7 +221,8 @@ def on_worker_process(data):
         *vf_param,
         "-c:v", "hevc_qsv",
         "-global_quality", gq, "-maxrate", mr, "-bufsize", bs,
-        *settings.get_setting("Extent").split(),
+        *audio_param,
+        *extend,
         "-movflags", "+faststart",
         data['file_out']
     ]

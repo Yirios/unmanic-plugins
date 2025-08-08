@@ -75,6 +75,7 @@ class Settings(PluginSettings):
         "-qmax": 25,
         "-rc-lookahead": 32,
         "Copy Audio": True,
+        "Extend":"",
         "Container": ".mp4",
     }
 
@@ -221,6 +222,7 @@ def on_worker_process(data):
     qmin = str(settings.get_setting("-qmin"))
     qmax = str(settings.get_setting("-qmax"))
     lookahead = str(settings.get_setting("-rc-lookahead"))
+    extend = settings.get_setting("Extend").split()
     data['exec_command'] = [
         "ffmpeg",
         "-hide_banner", "-loglevel", "info", "-y",
@@ -231,6 +233,7 @@ def on_worker_process(data):
         "-preset", settings.get_setting("-preset"), "-rc", "vbr",
         "-cq", cq, "-qmin", qmin, "-qmax", qmax, "-rc-lookahead", lookahead,
         *audio_param,
+        *extend,
         "-movflags", "+faststart",
         data['file_out']
     ]
