@@ -103,23 +103,23 @@ class PluginStreamMapper(StreamMapper):
         # if or not select stream
         self.found_search_string_streams = False
 
-    def set_settings(self, settings: Dict):
+    def set_settings(self, settings: Settings):
         self.settings = settings
         self.stream_types =[
             stream_type
             for stream_type in ["video", "audio", "subtitle"]
-            if not settings.get(
+            if not settings.get_setting(
                 "Copy all the " + stream_type
                 )
         ]
         self.select_codecs = {
-            stream_type : settings.get(
+            stream_type : settings.get_setting(
                 f"Select {stream_type} codec", ""
             ).split()
             for stream_type in self.stream_types
         }
         self.search_strings = {
-            stream_type : settings.get(
+            stream_type : settings.get_setting(
                 "Search keywords in " + stream_type
             ).split()
             for stream_type in self.stream_types
