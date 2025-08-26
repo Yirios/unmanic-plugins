@@ -86,6 +86,13 @@ class Settings(PluginSettings):
         if self.get_setting(key):
             values["display"] = 'hidden'
         return values
+    
+    def get_setting(self, key, default_value):
+        value = super(Settings, self).get_setting(key)
+        if value is None:
+            return default_value
+        else:
+            return value
 
 
 class PluginStreamMapper(StreamMapper):
@@ -108,20 +115,20 @@ class PluginStreamMapper(StreamMapper):
         self.stream_types =[
             stream_type
             for stream_type in ["video", "audio", "subtitle"]
-            if not settings.get_setting(
+            if not self.settings.get(
                 "Copy all the " + stream_type
                 )
         ]
         self.select_codecs = {
-            stream_type : settings.get_setting(
-                f"Select {stream_type} codec"
+            stream_type : self.settings.get_setting(
+                f"Select {stream_type} codec", ""
             ).split()
             for stream_type in self.stream_types
             if not stream_type == "subtitle"
         }
         self.search_strings = {
-            stream_type : settings.get_setting(
-                "Search keywords in " + stream_type
+            stream_type : self.settings.get_setting(
+                "Search keywords in " + stream_type, ""
             ).split()
             for stream_type in self.stream_types
         }
