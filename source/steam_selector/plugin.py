@@ -59,7 +59,7 @@ class Settings(PluginSettings):
         "Select video codec": "hevc",
         "Search keywords in video tag": "",
         "Copy all the audio": False,
-        "Select audio codec": "acc",
+        "Select audio codec": "aac",
         "Search keywords in audio tag": "",
         "Copy all the subtitle": False,
         "Search keywords in subtitle tag": "",
