@@ -5,7 +5,7 @@
         2
     ],
     "description": "move and rename",
-    "icon": "https://raw.githubusercontent.com/Unmanic/plugin.video_transcoder/master/icon.png",
+    "icon": "https://raw.githubusercontent.com/Unmanic/plugin.mover2/master/icon.png",
     "id": "move_and_rename",
     "name": "Move and Rename",
     "platform": [
@@ -16,5 +16,5 @@
         "on_worker_process": 1
     },
     "tags": "yiriso",
-    "version": "0.0.2"
+    "version": "0.0.3"
 }
