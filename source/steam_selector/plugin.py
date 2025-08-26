@@ -61,7 +61,7 @@ class Settings(PluginSettings):
         "Copy all the audio": False,
         "Select audio codec": "aac",
         "Search keywords in audio tag": "",
-        "Copy all the subtitle": False,
+        "Copy all the subtitle": True,
         "Search keywords in subtitle tag": "",
     }
 
@@ -136,9 +136,6 @@ class PluginStreamMapper(StreamMapper):
             stream_type : False
             for stream_type in self.stream_types
         }
-        logger.warning(f"{self.stream_types}")
-        logger.warning(f"{self.select_codecs}")
-        logger.warning(f"{self.search_strings}")
 
     def test_stream_needs_processing(self, stream_info: Dict):
         return stream_info.get("codec_type") in self.stream_types
@@ -153,7 +150,6 @@ class PluginStreamMapper(StreamMapper):
             if search_string in stream_tags.get("title", ""):
                 return True
         for codec in self.select_codecs.get(codec_type):
-            logger.warning(f"{codec}=={stream_info.get('codec_name', '')}")
             if codec.lower() == stream_info.get("codec_name", "").lower():
                 return True 
         return False
@@ -191,7 +187,6 @@ class PluginStreamMapper(StreamMapper):
         stream_encoding = []
 
         codec_type = stream_info.get("codec_type")
-        logger.warning(f"{codec_type},{stream_info}")
 
         if self.valid_select_stream(codec_type, stream_info):
             if not self.found_select_streams.get(codec_type):
@@ -227,7 +222,6 @@ class PluginStreamMapper(StreamMapper):
             else:
                 logger.warning("None Streams were select, check out output file")
             return True
-        
 
 def on_worker_process(data:Dict):
     """

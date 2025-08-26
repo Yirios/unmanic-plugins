@@ -7,7 +7,7 @@
     "description": "steam selector",
     "icon": "https://raw.githubusercontent.com/j7126/unmanic-remove_streams_by_codec/master/icon.png",
     "id": "steam_selector",
-    "name": "steam selector",
+    "name": "Steam Selector",
     "platform": [
         "all"
     ],
@@ -16,5 +16,5 @@
         "on_worker_process": 1
     },
     "tags": "yiriso,ffmpeg",
-    "version": "0.1.1"
+    "version": "0.1.2"
 }
