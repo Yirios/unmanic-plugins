@@ -212,7 +212,7 @@ class PluginStreamMapper(StreamMapper):
                     "0:{}:{}".format(ident.get(codec_type), self.__stream_counter ),
                 ]
                 self.__stream_counter += 1
-            self.found_select_streams.get(codec_type) = True
+            self.found_select_streams[codec_type] = True
 
         return {"stream_mapping": stream_mapping, "stream_encoding": stream_encoding}
     
