@@ -149,7 +149,7 @@ class PluginStreamMapper(StreamMapper):
             if search_string in stream_tags.get("title", ""):
                 return True
         for codec in self.select_codecs.get(codec_type):
-            logger.warning(f"{codec}=={stream_info.get("codec_name", "")}")
+            logger.warning(f"{codec}=={stream_info.get('codec_name', '')}")
             if codec.lower() == stream_info.get("codec_name", "").lower():
                 return True 
         return False
