@@ -114,9 +114,10 @@ class PluginStreamMapper(StreamMapper):
         ]
         self.select_codecs = {
             stream_type : settings.get_setting(
-                f"Select {stream_type} codec", ""
+                f"Select {stream_type} codec"
             ).split()
             for stream_type in self.stream_types
+            if not stream_type == "subtitle"
         }
         self.search_strings = {
             stream_type : settings.get_setting(
