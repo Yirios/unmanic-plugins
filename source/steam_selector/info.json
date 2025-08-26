@@ -1,0 +1,20 @@
+{
+    "author": "Yiriso",
+    "compatibility": [
+        1,
+        2
+    ],
+    "description": "steam selector",
+    "icon": "https://raw.githubusercontent.com/j7126/unmanic-remove_streams_by_codec/master/icon.png",
+    "id": "steam_selector",
+    "name": "steam selector",
+    "platform": [
+        "all"
+    ],
+    "priorities": {
+        "on_library_management_file_test": 99,
+        "on_worker_process": 1
+    },
+    "tags": "yiriso,ffmpeg",
+    "version": "0.0.1"
+}
