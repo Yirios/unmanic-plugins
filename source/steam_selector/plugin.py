@@ -107,8 +107,8 @@ class PluginStreamMapper(StreamMapper):
         self.search_strings = None
         # A list of stream we interest
         self.stream_types = None
-        # if or not select stream
-        self.found_search_string_streams = False
+        # A dict of if or not select stream
+        self.found_select_streams = None
 
     def set_settings(self, settings: Settings):
         self.settings = settings
@@ -130,6 +130,10 @@ class PluginStreamMapper(StreamMapper):
             stream_type : self.settings.get(
                 "Search keywords in " + stream_type
             ).split()
+            for stream_type in self.stream_types
+        }
+        self.found_select_streams = {
+            stream_type : False
             for stream_type in self.stream_types
         }
         logger.warning(f"{self.stream_types}")
@@ -190,23 +194,25 @@ class PluginStreamMapper(StreamMapper):
         logger.warning(f"{codec_type},{stream_info}")
 
         if self.valid_select_stream(codec_type, stream_info):
-            if not self.found_search_string_streams:
+            if not self.found_select_streams.get(codec_type):
                 self.stream_mapping += [
                     "-map",
                     "0:{}:{}".format(ident.get(codec_type), stream_id),
                     "-disposition:{}:{}".format(ident.get(codec_type), 0),
                     "default",
                 ]
+                stream_encoding = [
+                    "-c:{}:{}".format(ident.get(codec_type), 0),
+                    "copy"
+                ]
+                self.__stream_counter = 1
             else:
                 self.stream_mapping += [
                     "-map",
-                    "0:{}:{}".format(ident.get(codec_type), stream_id),
+                    "0:{}:{}".format(ident.get(codec_type), self.__stream_counter ),
                 ]
-            stream_encoding = [
-                "-c:{}:{}".format(ident.get(codec_type), stream_id),
-                "copy"
-            ]
-            self.found_search_string_streams = True
+                self.__stream_counter += 1
+            self.found_select_streams.get(codec_type) = True
 
         return {"stream_mapping": stream_mapping, "stream_encoding": stream_encoding}
     
@@ -216,7 +222,7 @@ class PluginStreamMapper(StreamMapper):
             return False
         else:
             self.streams_need_processing()
-            if self.found_search_string_streams :
+            if all(self.found_select_streams.values()) :
                 logger.info("Streams were found matching the search string")
             else:
                 logger.warning("None Streams were select, check out output file")
