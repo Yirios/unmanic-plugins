@@ -35,3 +35,6 @@ template/
 
 # Plugin site-packages
 source/**/site-packages/**
+
+# Vscode setting
+.vscode
