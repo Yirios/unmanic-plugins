@@ -2,7 +2,10 @@
 
 ## Instructions
 
-A better transcoding workflow for network streaming.
+This repository is aim to build a better transcoding workflow for network streaming.
+1. select streams
+2. transcode
+3. rename file
 
 ### Repo URL:
 <!-- Replace the below link with your own repo URL (found in the 'repo' git branch) -->

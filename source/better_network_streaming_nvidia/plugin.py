@@ -180,10 +180,16 @@ class Settings(PluginSettings):
         }
     
     def __show_when_cpu_decoding(self, key):
-        return self.__hidden_when("Enadle Hardware Decoding") and self.__show_when(key)
+        values = {}
+        if self.get_setting("Enadle Hardware Decoding") or not self.get_setting(key):
+            values["display"] = 'hidden'
+        return values
     
-    def __show_when_gpu_decoding(self,key):
-        return self.__show_when("Enadle Hardware Decoding") and self.__show_when(key)
+    def __show_when_gpu_decoding(self, key):
+        values = {}
+        if not self.get_setting("Enadle Hardware Decoding") and self.get_setting(key):
+            values["display"] = 'hidden'
+        return values
 
     def __show_when(self, key):
         values = {}
