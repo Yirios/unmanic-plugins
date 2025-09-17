@@ -40,11 +40,18 @@
             :param data     - Dictionary object of data that will configure how the FFMPEG process is executed.
 
 """
+
+import logging
 import os
+from pathlib import Path
+import warnings
+from typing import Dict, List
 
 from unmanic.libs.unplugins.settings import PluginSettings
 from unmanic.libs.system import System
+from steam_selector.lib.ffmpeg import Parser, Probe, StreamMapper
 
+logger = logging.getLogger("Unmanic.Plugin.better_network_streaming_nvidia")
 
 class Settings(PluginSettings):
     """
@@ -61,21 +68,32 @@ class Settings(PluginSettings):
 
     """
     settings = {
-        "Enable Filter":True,
+        "Enadle Hardware Decoding": False,
+        ## filter config ##
+        "Enable Video Filter": True,
         "bilateral_cuda=": "window_size=9:sigmaS=3.0:sigmaR=50.0",
+        "hqdn3d=": "luma_spatial=4.0",
+        ## resolution config ##
         "Change Resolution": False,
         "scale_cuda=": "1920:-1",
-        # "Change FPS": False,
-        # "fps=": "fps=30",
+        "scale=": "w=1920:h=-1",
+        ## fps config ##
+        "Change FPS": False,
+        "fps=": "fps=30",
+        ## crop window ##
         "Crop Window": False,
         "crop=": "1920:804:0:138",
+        ## video decoding config ##
         "-preset": "p7",
         "-cq": 25,
         "-qmin": 25,
         "-qmax": 25,
         "-rc-lookahead": 32,
+        ## audio config ##
         "Copy Audio": True,
-        "Extend":"",
+        "Enable Audio Filter": False,
+        "-af": "highpass=200,lowpass=3000,afftdn",
+        ## packaging ##
         "Container": ".mp4",
     }
 
@@ -83,6 +101,12 @@ class Settings(PluginSettings):
         super(Settings, self).__init__(*args, **kwargs)
 
         self.form_settings = {
+            "bilateral_cuda=":  self.__show_when_gpu_decoding("Enable Filter"),
+            "scale_cuda=":  self.__show_when_gpu_decoding("Change Resolution"),
+            "hqdn3d=": self.__show_when_cpu_decoding("Change Resolution"),
+            "scale=": self.__show_when_cpu_decoding("Change Resolution"),
+            "crop=": self.__show_when_cpu_decoding("Crop Window"),
+            "fps=": self.__show_when_cpu_decoding("Change FPS"),
             "-preset": {
                 "input_type":     "select",
                 "select_options": [
@@ -151,11 +175,15 @@ class Settings(PluginSettings):
                     "step":   1
                 },
             },
-            "scale_cuda=":  self.__show_when("Change Resolution"),
-            "bilateral_cuda=":  self.__show_when("Enable Filter"),
-            "crop=": self.__show_when("Crop Window"),
-            # "fps=": self.__show_when("Change FPS"),
+            "Enable Audio Filter": self.__hidden_when("Copy Audio"),
+            "-af" : self.__show_when("Enable Audio Filter")
         }
+    
+    def __show_when_cpu_decoding(self, key):
+        return self.__hidden_when("Enadle Hardware Decoding") and self.__show_when(key)
+    
+    def __show_when_gpu_decoding(self,key):
+        return self.__show_when("Enadle Hardware Decoding") and self.__show_when(key)
 
     def __show_when(self, key):
         values = {}
@@ -168,12 +196,131 @@ class Settings(PluginSettings):
         if self.get_setting(key):
             values["display"] = 'hidden'
         return values
+    
+    def get(self, key, default_value=""):
+        value = super(Settings, self).get_setting(key)
+        if value is None:
+            return default_value
+        else:
+            return value
 
-def on_worker_process(data):
+
+class PluginStreamMapper(StreamMapper):
+    def __init__(self):
+        super(PluginStreamMapper, self).__init__(
+            logger, ["video", "audio"]
+        )
+        self.found_video = False
+        self.found_audio = False
+    
+    def set_settings(self, setting: Settings):
+        self.setting = setting
+        self.stream_types = ["video"]
+        if not setting.get("Copy Audio"):
+            self.stream_types.append("audio")
+        
+    def test_stream_needs_processing(self, stream_info: Dict):
+        return stream_info.get("codec_type") in self.stream_types
+    
+    def custom_stream_mapping(self, stream_info: Dict, stream_id: int):
+        """
+        Will be provided with stream_info and the stream_id of a stream that has been 
+        determined to need processing by the `test_stream_needs_processing` function.
+
+        Use this function to `-map` (select) an input stream to be included in the output file
+        and apply a `-c` (codec) selection and encoder arguments to the command.
+
+        This function must return a dictionary containing 2 key values:
+            {
+                "stream_mapping": [],
+                "stream_encoding": [],
+            }
+        
+        Where:
+            - "stream_mapping" is a list of arguments for input streams to map. Eg. ["-map", "0:v:1"]
+            - "stream_encoding" is a list of encoder arguments. Eg. ["-c:v:1", "libx264", "-preset", "slow"]
+
+
+        :param stream_info:
+        :param stream_id:
+        :return: dict
+        """
+        stream_mapping = []
+        stream_encoding = []
+
+        codec_type = stream_info.get("codec_type")
+
+        if codec_type == "video":
+            if self.found_video :
+                logger.warning(f"a video track has been founded, track {stream_id} will be delete")
+            else:
+                self.stream_mapping += [
+                    "-map", f"0:v:{stream_id}",
+                    "-disposition:v:0", "default"
+                ]
+
+                vf_param = []
+                def vf_adder(condition, key):
+                    if self.setting.get(condition):
+                        vf_param.append(
+                            key + self.setting.get(key)
+                        )
+                if self.setting.get("Enadle Hardware Decoding"):
+                    vf_adder("Enable Filter", "bilateral_cuda=")
+                    vf_adder("Change Resolution", "scale_cuda=")
+                else:
+                    vf_adder("Enable Filter", "hqdn3d=")
+                    vf_adder("Change Resolution", "scale=")
+                    vf_adder("Change FPS", "fps=")
+                    vf_adder("Crop Window", "crop=")
+                if len(vf_param) > 0:
+                    vf_param = [
+                        "-vf", ",".join(vf_param)
+                    ]
+
+                cq = str(self.setting.get("-cq"))
+                qmin = str(self.setting.get("-qmin"))
+                qmax = str(self.setting.get("-qmax"))
+                lookahead = str(self.setting.get("-rc-lookahead"))
+
+                stream_encoding = [
+                    "-c:v:0", "hevc_nvenc",
+                    *vf_param,
+                    "-preset", self.setting.get("-preset"), "-rc", "vbr",
+                    "-cq", cq, "-qmin", qmin, "-qmax", qmax, "-rc-lookahead", lookahead,
+                ]
+
+                self.found_video = True
+        
+        elif codec_type == "audio":
+            if self.found_audio:
+                logger.warning(f"a audio track has been founded, track {stream_id} will be delete")
+            else:
+                self.stream_mapping += [
+                    "-map", f"0:a:{stream_id}",
+                    "-disposition:a:0", "default"
+                ]
+                stream_encoding = [
+                    "-c:a:0"
+                ]
+                if self.setting.get("Enable Audio Filter"):
+                    stream_encoding.extend(
+                        ["-af", self.setting.get("-af")]
+                        )
+                stream_encoding.extend(
+                    ["-b:a", "192k", "-ac", "2"]
+                    )
+                self.found_audio = True
+        else:
+            raise ValueError(f"Error codec type: {codec_type}")
+
+        return {"stream_mapping": stream_mapping, "stream_encoding": stream_encoding}
+
+def on_worker_process(data:Dict):
     """
     Runner function - enables additional configured processing jobs during the worker stages of a task.
 
-    The 'data' object argument includes:
+    The "data" object argument includes:
         exec_command            - A command that Unmanic should execute. Can be empty.
         command_progress_parser - A function that Unmanic can use to parse the STDOUT of the command to collect progress stats. Can be empty.
         file_in                 - The source file to be processed by the command.
@@ -184,58 +331,41 @@ def on_worker_process(data):
     :param data:
     :return:
     """
-    settings = Settings(library_id=data.get('library_id'))
+    abspath = data.get("file_in")
 
-    container_extension = settings.get_setting('Container')
-    tmp_file_out = os.path.splitext(data['file_out'])
-    data['file_out'] = tmp_file_out[0] + container_extension
-
-    vf_param = []
-    if settings.get_setting("Enable Filter"):
-        vf_param.append(
-            "bilateral_cuda=" + settings.get_setting('bilateral_cuda=')
-        )
-    if settings.get_setting("Change Resolution"):
-        vf_param.append(
-            "scale_cuda=" + settings.get_setting('scale_cuda=')
-        )
-    if settings.get_setting("Crop Window"):
-        vf_param.append(
-            "hwdownload=extra_hw_frames=64,format=nv12,crop=" + \
-            settings.get_setting('crop=') + \
-            ",hwupload_cuda"
-        )
-    if len(vf_param) > 0:
-        vf_param = [
-            "-vf", ",".join(vf_param)
-        ]
+    # Get file probe
+    probe = Probe(logger, allowed_mimetypes=["video", "audio"])
+    if not probe.file(file_path=abspath):
+        # File not able to be probed by ffprobe. The file is probably not a audio/video file.
+        return
     
-    audio_param = ["-c:a"]
-    if settings.get_setting("Copy Audio"):
-        audio_param.append("copy")
+    # Configure settings object
+    if data.get("library_id"):
+        settings = Settings(library_id=data.get("library_id"))
     else:
-        audio_param.extend(
-            ["aac", "-af", "highpass=200,lowpass=3000,afftdn", "-b:a", "192k", "-ac", "2"]
-        )
+        settings = Settings()
+    
+    # Get stream mapper
+    mapper = PluginStreamMapper()
+    mapper.set_settings(settings)
+    mapper.set_probe(probe)
 
-    cq = str(settings.get_setting("-cq"))
-    qmin = str(settings.get_setting("-qmin"))
-    qmax = str(settings.get_setting("-qmax"))
-    lookahead = str(settings.get_setting("-rc-lookahead"))
-    extend = settings.get_setting("Extend").split()
-    data['exec_command'] = [
-        "ffmpeg",
-        "-hide_banner", "-loglevel", "info", "-y",
-        "-hwaccel", "cuda", "-hwaccel_output_format", "cuda",
-        "-i", data['file_in'],
-        *vf_param,
-        "-c:v", "hevc_nvenc",
-        "-preset", settings.get_setting("-preset"), "-rc", "vbr",
-        "-cq", cq, "-qmin", qmin, "-qmax", qmax, "-rc-lookahead", lookahead,
-        *audio_param,
-        *extend,
-        "-movflags", "+faststart",
-        data['file_out']
-    ]
+    mapper.streams_need_processing()
 
+    mapper.set_input_file(abspath)
+
+    base, _ = os.path.splitext(data.get("file_out"))
+    mapper.set_output_file(base + settings.get("Container"))
+
+    ffmpeg_args = mapper.get_ffmpeg_args()
+    logger.debug("ffmpeg_args: '{}'".format(ffmpeg_args))
+
+    # Apply ffmpeg args to command
+    data["exec_command"] = ["ffmpeg"]
+    data["exec_command"] += ffmpeg_args
+
+    parser = Parser(logger)
+    parser.set_probe(probe)
+    data["command_progress_parser"] = parser.parse_progress
+    
     return data
