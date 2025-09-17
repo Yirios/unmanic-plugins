@@ -103,7 +103,7 @@ class Settings(PluginSettings):
         self.form_settings = {
             "bilateral_cuda=":  self.__show_when_gpu_decoding("Enable Filter"),
             "scale_cuda=":  self.__show_when_gpu_decoding("Change Resolution"),
-            "hqdn3d=": self.__show_when_cpu_decoding("Change Resolution"),
+            "hqdn3d=": self.__show_when_cpu_decoding("Enable Filter"),
             "scale=": self.__show_when_cpu_decoding("Change Resolution"),
             "crop=": self.__show_when_cpu_decoding("Crop Window"),
             "fps=": self.__show_when_cpu_decoding("Change FPS"),
@@ -181,7 +181,7 @@ class Settings(PluginSettings):
     
     def __show_when_cpu_decoding(self, key):
         values = {}
-        if self.get_setting("Enadle Hardware Decoding") or not self.get_setting(key):
+        if self.get_setting("Enadle Hardware Decoding") and self.get_setting(key):
             values["display"] = 'hidden'
         return values
     
