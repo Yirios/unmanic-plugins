@@ -68,7 +68,7 @@ class Settings(PluginSettings):
 
     """
     settings = {
-        "Enadle Hardware Decoding": False,
+        "Enable Hardware Decoding": False,
         ## filter config ##
         "Enable Video Filter": True,
         "bilateral_cuda=": "window_size=9:sigmaS=3.0:sigmaR=50.0",
@@ -104,8 +104,10 @@ class Settings(PluginSettings):
             "scale_cuda=":  self.__show_when_gpu_decoding("Change Resolution"),
             "hqdn3d=": self.__show_when_cpu_decoding("Enable Filter"),
             "scale=": self.__show_when_cpu_decoding("Change Resolution"),
-            "crop=": self.__show_when_cpu_decoding("Crop Window"),
+            "Change FPS": self.__hidden_when("Enable Hardware Decoding"),
             "fps=": self.__show_when_cpu_decoding("Change FPS"),
+            "Crop Window": self.__hidden_when("Enable Hardware Decoding"),
+            "crop=": self.__show_when_cpu_decoding("Crop Window"),
             "-preset": {
                 "input_type":     "select",
                 "select_options": [
@@ -180,13 +182,13 @@ class Settings(PluginSettings):
     
     def __show_when_cpu_decoding(self, key):
         values = {}
-        if self.get_setting("Enadle Hardware Decoding"):
+        if self.get_setting("Enable Hardware Decoding"):
             values["display"] = 'hidden'
         return values
     
     def __show_when_gpu_decoding(self, key):
         values = {}
-        if not self.get_setting("Enadle Hardware Decoding"):
+        if not self.get_setting("Enable Hardware Decoding"):
             values["display"] = 'hidden'
         return values
 
@@ -270,7 +272,7 @@ class PluginStreamMapper(StreamMapper):
                         vf_param.append(
                             key + self.setting.get(key)
                         )
-                if self.setting.get("Enadle Hardware Decoding"):
+                if self.setting.get("Enable Hardware Decoding"):
                     vf_adder("Enable Filter", "bilateral_cuda=")
                     vf_adder("Change Resolution", "scale_cuda=")
                 else:
