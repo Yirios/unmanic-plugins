@@ -183,14 +183,14 @@ class Settings(PluginSettings):
     def __show_when_cpu_decoding(self, key):
         values = {}
         if self.get_setting("Enable Hardware Decoding"):
-            if len(self.get(key)) == 0:
+            if isinstance(self.get(key), bool) and not self.get(key):
                 values["display"] = 'hidden'
         return values
     
     def __show_when_gpu_decoding(self, key):
         values = {}
         if not self.get_setting("Enable Hardware Decoding"):
-            if len(self.get(key)) == 0:
+            if isinstance(self.get(key), bool) and not self.get(key):
                 values["display"] = 'hidden'
         return values
 
