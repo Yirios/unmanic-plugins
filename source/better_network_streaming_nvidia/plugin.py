@@ -70,7 +70,7 @@ class Settings(PluginSettings):
     settings = {
         "Enable Hardware Decoding": False,
         ## filter config ##
-        "Enable Video Filter": True,
+        "Enable Video Filter": False,
         "bilateral_cuda=": "window_size=9:sigmaS=3.0:sigmaR=50.0",
         "hqdn3d=": "luma_spatial=4.0",
         ## resolution config ##
