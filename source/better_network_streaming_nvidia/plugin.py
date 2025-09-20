@@ -184,8 +184,7 @@ class Settings(PluginSettings):
         values = {
             "display":'hidden'
         }
-        if self.get_setting("Enable Hardware Decoding"):
-            if isinstance(self.get(key), bool) and self.get(key):
+        if self.get_setting("Enable Hardware Decoding") and self.get(key):
                 values = {}
         return values
     
@@ -193,8 +192,7 @@ class Settings(PluginSettings):
         values = {
             "display":'hidden'
         }
-        if not self.get_setting("Enable Hardware Decoding"):
-            if isinstance(self.get(key), bool) and self.get(key):
+        if not self.get_setting("Enable Hardware Decoding") and self.get(key):
                 values = {}
         return values
 
