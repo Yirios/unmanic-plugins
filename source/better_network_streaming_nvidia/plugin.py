@@ -100,9 +100,9 @@ class Settings(PluginSettings):
     def __init__(self, *args, **kwargs):
         super(Settings, self).__init__(*args, **kwargs)
         self.form_settings = {
-            "bilateral_cuda=":  self.__show_when_gpu_decoding("Enable Filter"),
+            "bilateral_cuda=":  self.__show_when_gpu_decoding("Enable Video Filter"),
             "scale_cuda=":  self.__show_when_gpu_decoding("Change Resolution"),
-            "hqdn3d=": self.__show_when_cpu_decoding("Enable Filter"),
+            "hqdn3d=": self.__show_when_cpu_decoding("Enable Video Filter"),
             "scale=": self.__show_when_cpu_decoding("Change Resolution"),
             "Change FPS": self.__hidden_when("Enable Hardware Decoding"),
             "fps=": self.__show_when_cpu_decoding("Change FPS"),
