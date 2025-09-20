@@ -180,33 +180,37 @@ class Settings(PluginSettings):
             "-af" : self.__show_when("Enable Audio Filter")
         }
     
-    def __show_when_cpu_decoding(self, key):
+    def __show_when_cpu_decoding(self, key) -> Dict|bool:
         values = {
             "display":'hidden'
         }
         if self.get_setting("Enable Hardware Decoding"):
             if isinstance(self.get(key), bool) and self.get(key):
-                values = {}
+                values = False
         return values
     
-    def __show_when_gpu_decoding(self, key):
+    def __show_when_gpu_decoding(self, key) -> Dict|bool:
         values = {
             "display":'hidden'
         }
         if not self.get_setting("Enable Hardware Decoding"):
             if isinstance(self.get(key), bool) and self.get(key):
-                values = {}
+                values = False
         return values
 
     def __show_when(self, key):
         values = {}
+        if isinstance(self.get(key), dict):
+            values["display"] = 'hidden'
         if not self.get_setting(key):
             values["display"] = 'hidden'
         return values
     
     def __hidden_when(self, key):
         values = {}
-        if self.get_setting(key):
+        if isinstance(self.get(key), dict):
+            values["display"] = 'hidden'
+        if self.get_setting(key) :
             values["display"] = 'hidden'
         return values
     
