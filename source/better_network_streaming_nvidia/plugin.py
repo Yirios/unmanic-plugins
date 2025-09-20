@@ -185,7 +185,7 @@ class Settings(PluginSettings):
             "display":'hidden'
         }
         if self.get_setting("Enable Hardware Decoding") and self.get(key):
-                values = {}
+            values = {}
         return values
     
     def __show_when_gpu_decoding(self, key) -> Dict|bool:
@@ -193,7 +193,7 @@ class Settings(PluginSettings):
             "display":'hidden'
         }
         if not self.get_setting("Enable Hardware Decoding") and self.get(key):
-                values = {}
+            values = {}
         return values
 
     def __show_when(self, key):
