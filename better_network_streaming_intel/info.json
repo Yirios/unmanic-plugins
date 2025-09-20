@@ -1,0 +1,20 @@
+{
+    "author": "Yiriso",
+    "compatibility": [
+        1,
+        2
+    ],
+    "description": "Better Network Streaming encoding by QSV",
+    "icon": "https://raw.githubusercontent.com/Unmanic/plugin.video_transcoder/master/icon.png",
+    "id": "better_network_streaming_intel",
+    "name": "Better Network Streaming (intel)",
+    "platform": [
+        "all"
+    ],
+    "priorities": {
+        "on_library_management_file_test": 99,
+        "on_worker_process": 1
+    },
+    "tags": "yiriso,ffmpeg",
+    "version": "0.1.7"
+}

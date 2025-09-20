@@ -1,0 +1,111 @@
+{
+    "repo": {
+        "id": "repository.yiriso",
+        "name": "Yiriso's unmanic plugins",
+        "icon": "",
+        "repo_data_directory": "https://raw.githubusercontent.com/Yirios/unmanic-plugins/repo/",
+        "repo_data_url": "https://raw.githubusercontent.com/Yirios/unmanic-plugins/repo/repo.json"
+    },
+    "plugins": [
+        {
+            "author": "Yiriso",
+            "compatibility": [
+                1,
+                2
+            ],
+            "description": "ffprobe viewer",
+            "icon": "https://raw.githubusercontent.com/Unmanic/plugin.video_transcoder/master/icon.png",
+            "id": "ffprobe_viewer",
+            "name": "ffprobe viewer",
+            "platform": [
+                "all"
+            ],
+            "priorities": {
+                "on_library_management_file_test": 99,
+                "on_worker_process": 1
+            },
+            "tags": "yiriso,ffprobe",
+            "version": "0.0.2"
+        },
+        {
+            "author": "Yiriso",
+            "compatibility": [
+                1,
+                2
+            ],
+            "description": "Better Network Streaming encoding by QSV",
+            "icon": "https://raw.githubusercontent.com/Unmanic/plugin.video_transcoder/master/icon.png",
+            "id": "better_network_streaming_intel",
+            "name": "Better Network Streaming (intel)",
+            "platform": [
+                "all"
+            ],
+            "priorities": {
+                "on_library_management_file_test": 99,
+                "on_worker_process": 1
+            },
+            "tags": "yiriso,ffmpeg",
+            "version": "0.1.7"
+        },
+        {
+            "author": "Yiriso",
+            "compatibility": [
+                1,
+                2
+            ],
+            "description": "steam selector",
+            "icon": "https://raw.githubusercontent.com/j7126/unmanic-remove_streams_by_codec/master/icon.png",
+            "id": "steam_selector",
+            "name": "Steam Selector",
+            "platform": [
+                "all"
+            ],
+            "priorities": {
+                "on_library_management_file_test": 99,
+                "on_worker_process": 1
+            },
+            "tags": "yiriso,ffmpeg",
+            "version": "0.1.2"
+        },
+        {
+            "author": "Yiriso",
+            "compatibility": [
+                1,
+                2
+            ],
+            "description": "Better Network Streaming encoding by NVENC",
+            "icon": "https://raw.githubusercontent.com/Unmanic/plugin.video_transcoder/master/icon.png",
+            "id": "better_network_streaming_nvidia",
+            "name": "Better Network Streaming (nvidia)",
+            "platform": [
+                "all"
+            ],
+            "priorities": {
+                "on_library_management_file_test": 99,
+                "on_worker_process": 1
+            },
+            "tags": "yiriso,ffmpeg",
+            "version": "0.2.17"
+        },
+        {
+            "author": "Yiriso",
+            "compatibility": [
+                1,
+                2
+            ],
+            "description": "move and rename",
+            "icon": "https://raw.githubusercontent.com/Unmanic/plugin.mover2/master/icon.png",
+            "id": "move_and_rename",
+            "name": "Move and Rename",
+            "platform": [
+                "all"
+            ],
+            "priorities": {
+                "on_library_management_file_test": 99,
+                "on_worker_process": 1
+            },
+            "tags": "yiriso",
+            "version": "0.0.3"
+        }
+    ]
+}
