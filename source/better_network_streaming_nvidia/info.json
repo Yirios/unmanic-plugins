@@ -16,5 +16,5 @@
         "on_worker_process": 1
     },
     "tags": "yiriso,ffmpeg",
-    "version": "0.2.17"
+    "version": "0.3.0"
 }

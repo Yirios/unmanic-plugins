@@ -68,6 +68,7 @@ class Settings(PluginSettings):
 
     """
     settings = {
+        "Copy Video": False,
         "Enable Hardware Decoding": False,
         ## filter config ##
         "Enable Video Filter": False,
@@ -226,7 +227,11 @@ class PluginStreamMapper(StreamMapper):
     
     def set_settings(self, setting: Settings):
         self.setting = setting
-        self.stream_types = ["video"]
+        self.stream_types = []
+
+        if not setting.get("Copy Video"):
+            self.stream_types.append("video")
+        
         if not setting.get("Copy Audio"):
             self.stream_types.append("audio")
         
