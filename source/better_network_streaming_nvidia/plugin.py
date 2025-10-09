@@ -300,8 +300,8 @@ class PluginStreamMapper(StreamMapper):
                 lookahead = str(self.setting.get("-rc-lookahead"))
 
                 stream_encoding = [
-                    "-c:v:0", "hevc_nvenc",
                     *vf_param,
+                    "-c:v:0", "hevc_nvenc",
                     "-preset", self.setting.get("-preset"), "-rc", "vbr",
                     "-cq", cq, "-qmin", qmin, "-qmax", qmax, "-rc-lookahead", lookahead,
                 ]
