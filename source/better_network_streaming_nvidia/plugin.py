@@ -371,7 +371,9 @@ def on_worker_process(data:Dict):
     mapper.set_input_file(abspath)
 
     base, _ = os.path.splitext(data.get("file_out"))
-    mapper.set_output_file(base + settings.get("Container"))
+    file_out = base + settings.get("Container")
+    mapper.set_output_file(file_out)
+    data["file_out"] = file_out
 
     ffmpeg_args = mapper.get_ffmpeg_args()
     logger.debug("ffmpeg_args: '{}'".format(ffmpeg_args))
