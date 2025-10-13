@@ -317,7 +317,7 @@ class PluginStreamMapper(StreamMapper):
                     "-disposition:a:0", "default"
                 ]
                 stream_encoding = [
-                    "-c:a:0"
+                    "-c:a:0", "aac"
                 ]
                 if self.setting.get("Enable Audio Filter"):
                     stream_encoding.extend(
