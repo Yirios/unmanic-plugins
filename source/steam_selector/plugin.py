@@ -128,7 +128,7 @@ class PluginStreamMapper(StreamMapper):
         }
         self.search_strings = {
             stream_type : self.settings.get(
-                "Search keywords in " + stream_type
+                "Search keywords in " + stream_type + " tag"
             ).split()
             for stream_type in self.stream_types
         }
