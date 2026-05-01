@@ -40,11 +40,17 @@
             :param data     - Dictionary object of data that will configure how the FFMPEG process is executed.
 
 """
+
+import logging
 import os
+from pathlib import Path
+import warnings
+from typing import Dict, List
 
 from unmanic.libs.unplugins.settings import PluginSettings
-from unmanic.libs.system import System
+from better_network_streaming_intel.lib.ffmpeg import Parser, Probe, StreamMapper
 
+logger = logging.getLogger("Unmanic.Plugin.better_network_streaming_intel")
 
 class Settings(PluginSettings):
     """
@@ -53,7 +59,7 @@ class Settings(PluginSettings):
 
     This class has a number of methods available to it for accessing these settings:
 
-        > get_setting(<key>)            - Fetch a single setting value. Or leave the 
+        > get_setting(<key>)            - Fetch a single setting value. Or leave the
                                         key argument empty and return the full dictionary.
         > set_setting(<key>, <value>)   - Set a singe setting value.
                                         Used by the Unmanic WebUI to save user settings.
@@ -61,30 +67,47 @@ class Settings(PluginSettings):
 
     """
     settings = {
-        "Enable Filter":True,
+        ## filter config ##
+        "Enable Filter": True,
         "hqdn3d=": "luma_spatial=4.0",
+        ## resolution config ##
         "Change Resolution": False,
         "scale=": "w=1920:h=-1",
+        ## fps config ##
         "Change FPS": False,
         "fps=": "fps=30",
+        ## crop window ##
         "Crop Window": False,
         "crop=": "1920:804:0:138",
+        ## video encoding config ##
         "-global_quality": 25,
-        "Encoder Quality Preset": "veryslow",
         "-maxrate": 3000,
         "-bufsize": 6000,
+        "-preset": "veryslow",
+        ## audio config ##
         "Copy Audio": True,
-        "Extend":"",
+        ## packaging ##
         "Container": ".mp4",
     }
 
     def __init__(self, *args, **kwargs):
         super(Settings, self).__init__(*args, **kwargs)
-
         self.form_settings = {
-            "Encoder Quality Preset": {
+            "hqdn3d=": self.__show_when("Enable Filter"),
+            "scale=": self.__show_when("Change Resolution"),
+            "fps=": self.__show_when("Change FPS"),
+            "crop=": self.__show_when("Crop Window"),
+            "-preset": {
                 "input_type":     "select",
                 "select_options": [
+                    {
+                        'value': "veryfast",
+                        'label': "veryfast",
+                    },
+                    {
+                        'value': "faster",
+                        'label': "faster",
+                    },
                     {
                         'value': "fast",
                         'label': "fast",
@@ -96,6 +119,10 @@ class Settings(PluginSettings):
                     {
                         'value': "slow",
                         'label': "slow",
+                    },
+                    {
+                        'value': "slower",
+                        'label': "slower",
                     },
                     {
                         'value': "veryslow",
@@ -145,31 +172,152 @@ class Settings(PluginSettings):
                     "suffix": "k"
                 },
             },
-            "hqdn3d=":  self.__show_when("Enable Filter"),
-            "scale=":  self.__show_when("Change Resolution"),
-            "crop=":  self.__show_when("Crop Window"),
-            "fps=" : self.__show_when("Change FPS"),
         }
+
+    def __show_when_cpu_decoding(self, key) -> Dict:
+        values = {
+            "display": 'hidden'
+        }
+        if not self.get_setting("Enable Hardware Decoding") and self.get(key):
+            values = {}
+        return values
 
     def __show_when(self, key):
         values = {}
         if not self.get_setting(key):
             values["display"] = 'hidden'
         return values
-    
+
     def __hidden_when(self, key):
         values = {}
         if self.get_setting(key):
             values["display"] = 'hidden'
         return values
 
+    def get(self, key, default_value=""):
+        value = super(Settings, self).get_setting(key)
+        if value is None:
+            return default_value
+        else:
+            return value
 
 
-def on_worker_process(data):
+class PluginStreamMapper(StreamMapper):
+    def __init__(self):
+        super(PluginStreamMapper, self).__init__(
+            logger, ["video", "audio"]
+        )
+        self.found_video = False
+        self.found_audio = False
+
+    def set_settings(self, setting: Settings):
+        self.setting = setting
+        self.stream_types = []
+
+        self.stream_types.append("video")
+
+        if not setting.get("Copy Audio"):
+            self.stream_types.append("audio")
+
+    def test_stream_needs_processing(self, stream_info: Dict):
+        return stream_info.get("codec_type") in self.stream_types
+
+    def custom_stream_mapping(self, stream_info: Dict, stream_id: int):
+        """
+        Will be provided with stream_info and the stream_id of a stream that has been
+        determined to need processing by the `test_stream_needs_processing` function.
+
+        Use this function to `-map` (select) an input stream to be included in the output file
+        and apply a `-c` (codec) selection and encoder arguments to the command.
+
+        This function must return a dictionary containing 2 key values:
+            {
+                "stream_mapping": [],
+                "stream_encoding": [],
+            }
+
+        Where:
+            - "stream_mapping" is a list of arguments for input streams to map. Eg. ["-map", "0:v:1"]
+            - "stream_encoding" is a list of encoder arguments. Eg. ["-c:v:1", "libx264", "-preset", "slow"]
+
+
+        :param stream_info:
+        :param stream_id:
+        :return: dict
+        """
+        stream_mapping = []
+        stream_encoding = []
+
+        codec_type = stream_info.get("codec_type")
+
+        if codec_type == "video":
+            if self.found_video:
+                logger.warning(f"a video track has been founded, track {stream_id} will be delete")
+            else:
+                self.stream_mapping += [
+                    "-map", f"0:v:{stream_id}",
+                    "-disposition:v:0", "default"
+                ]
+
+                vf_param = []
+                def vf_adder(condition, key):
+                    if self.setting.get(condition):
+                        vf_param.append(
+                            key + self.setting.get(key)
+                        )
+                vf_adder("Enable Filter", "hqdn3d=")
+                vf_adder("Change Resolution", "scale=")
+                vf_adder("Change FPS", "fps=")
+                vf_adder("Crop Window", "crop=")
+                if len(vf_param) > 0:
+                    vf_param = [
+                        "-vf", ",".join(vf_param)
+                    ]
+
+                gq = str(self.setting.get("-global_quality"))
+                mr = str(self.setting.get("-maxrate")) + 'k'
+                bs = str(self.setting.get("-bufsize")) + 'k'
+
+                stream_encoding = [
+                    *vf_param,
+                    "-c:v:0", "hevc_qsv",
+                    "-global_quality", gq, "-maxrate", mr, "-bufsize", bs,
+                    "-preset", self.setting.get("-preset"),
+                ]
+
+                self.found_video = True
+
+        elif codec_type == "audio":
+            if self.found_audio:
+                logger.warning(f"a audio track has been founded, track {stream_id} will be delete")
+            else:
+                self.stream_mapping += [
+                    "-map", f"0:a:{stream_id}",
+                    "-disposition:a:0", "default"
+                ]
+                if self.setting.get("Copy Audio"):
+                    stream_encoding = [
+                        "-c:a:0", "copy"
+                    ]
+                else:
+                    stream_encoding = [
+                        "-c:a:0", "aac",
+                        "-af", "highpass=200,lowpass=3000,afftdn",
+                        "-b:a", "192k", "-ac", "2"
+                    ]
+                self.found_audio = True
+
+        else:
+            raise ValueError(f"Error codec type: {codec_type}")
+
+        return {"stream_mapping": stream_mapping, "stream_encoding": stream_encoding}
+
+
+def on_worker_process(data: Dict):
     """
     Runner function - enables additional configured processing jobs during the worker stages of a task.
 
-    The 'data' object argument includes:
+    The "data" object argument includes:
         exec_command            - A command that Unmanic should execute. Can be empty.
         command_progress_parser - A function that Unmanic can use to parse the STDOUT of the command to collect progress stats. Can be empty.
         file_in                 - The source file to be processed by the command.
@@ -180,51 +328,46 @@ def on_worker_process(data):
     :param data:
     :return:
     """
-    settings = Settings(library_id=data.get('library_id'))
+    abspath = data.get("file_in")
 
-    container_extension = settings.get_setting('Container')
-    tmp_file_out = os.path.splitext(data['file_out'])
-    data['file_out'] = tmp_file_out[0] + container_extension
+    # Get file probe
+    probe = Probe(logger, allowed_mimetypes=["video", "audio"])
+    if not probe.file(file_path=abspath):
+        # File not able to be probed by ffprobe. The file is probably not a audio/video file.
+        return
 
-    vf_param = []
-    if settings.get_setting("Enable Filter"):
-        filter_param = settings.get_setting("hqdn3d=")
-        vf_param.append(f"hqdn3d={filter_param}")
-    if settings.get_setting("Change Resolution"):
-        scale = settings.get_setting('scale=')
-        vf_param.append(f"scale={scale}")
-    if settings.get_setting("Change FPS"):
-        fps = settings.get_setting('fps=')
-        vf_param.append(f"fps={fps}")
-    if settings.get_setting("Crop Window"):
-        crop = settings.get_setting('crop=')
-        vf_param.append(f"crop={crop}")
-    if len(vf_param) > 0:
-        vf_param = ["-vf", ",".join(vf_param)]
-        
-    audio_param = ["-c:a"]
-    if settings.get_setting("Copy Audio"):
-        audio_param.append("copy")
+    # Configure settings object
+    if data.get("library_id"):
+        settings = Settings(library_id=data.get("library_id"))
     else:
-        audio_param.extend(
-            ["aac", "-af", "highpass=200,lowpass=3000,afftdn", "-b:a", "192k", "-ac", "2"]
-        )
-    
-    gq = str(settings.get_setting("-global_quality"))
-    mr = str(settings.get_setting("-maxrate")) + 'k'
-    bs = str(settings.get_setting("-bufsize")) + 'k'
-    extend = settings.get_setting("Extend").split()
-    data['exec_command'] = [
-        "ffmpeg",
-        "-hide_banner", "-loglevel", "info", "-y",
-        "-i", data['file_in'],
-        *vf_param,
-        "-c:v", "hevc_qsv",
-        "-global_quality", gq, "-maxrate", mr, "-bufsize", bs,
-        *audio_param,
-        *extend,
-        "-movflags", "+faststart",
-        data['file_out']
-    ]
+        settings = Settings()
+
+    # Get stream mapper
+    mapper = PluginStreamMapper()
+    mapper.set_settings(settings)
+    mapper.set_probe(probe)
+
+    mapper.streams_need_processing()
+
+    mapper.set_input_file(abspath)
+
+    base, _ = os.path.splitext(data.get("file_out"))
+    file_out = base + settings.get("Container")
+    mapper.set_output_file(file_out)
+    data["file_out"] = file_out
+
+    # Add faststart as an advanced option
+    mapper.set_ffmpeg_advanced_options("-movflags", "+faststart")
+
+    ffmpeg_args = mapper.get_ffmpeg_args()
+    logger.debug("ffmpeg_args: '{}'".format(ffmpeg_args))
+
+    # Apply ffmpeg args to command
+    data["exec_command"] = ["ffmpeg"]
+    data["exec_command"] += ffmpeg_args
+
+    parser = Parser(logger)
+    parser.set_probe(probe)
+    data["command_progress_parser"] = parser.parse_progress
 
     return data
