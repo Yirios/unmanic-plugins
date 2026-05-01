@@ -66,10 +66,15 @@ class Settings(PluginSettings):
                                         Settings are stored on disk in order to be persistent.
 
     """
+
     settings = {
+        "Copy Video": False,
+        "Enable Hardware Decoding": False,
         ## filter config ##
-        "Enable Filter": True,
+        "Enable Video Filter": True,
         "hqdn3d=": "luma_spatial=4.0",
+        "vpp_qsv_denoise=": "40",
+        "scale_qsv=": "1920:-1",
         ## resolution config ##
         "Change Resolution": False,
         "scale=": "w=1920:h=-1",
@@ -86,6 +91,8 @@ class Settings(PluginSettings):
         "-preset": "veryslow",
         ## audio config ##
         "Copy Audio": True,
+        "Enable Audio Filter": False,
+        "-af": "highpass=200,lowpass=3000,afftdn",
         ## packaging ##
         "Container": ".mp4",
     }
@@ -93,10 +100,14 @@ class Settings(PluginSettings):
     def __init__(self, *args, **kwargs):
         super(Settings, self).__init__(*args, **kwargs)
         self.form_settings = {
-            "hqdn3d=": self.__show_when("Enable Filter"),
-            "scale=": self.__show_when("Change Resolution"),
-            "fps=": self.__show_when("Change FPS"),
-            "crop=": self.__show_when("Crop Window"),
+            "vpp_qsv_denoise=": self.__show_when_gpu_decoding("Enable Video Filter"),
+            "scale_qsv=": self.__show_when_gpu_decoding("Change Resolution"),
+            "hqdn3d=": self.__show_when_cpu_decoding("Enable Video Filter"),
+            "scale=": self.__show_when_cpu_decoding("Change Resolution"),
+            "fps=": self.__show_when_cpu_decoding("Change FPS"),
+            "crop=": self.__show_when_cpu_decoding("Crop Window"),
+            "Change FPS": self.__hidden_when("Enable Hardware Decoding"),
+            "Crop Window": self.__hidden_when("Enable Hardware Decoding"),
             "-preset": {
                 "input_type":     "select",
                 "select_options": [
@@ -172,7 +183,17 @@ class Settings(PluginSettings):
                     "suffix": "k"
                 },
             },
+            "Enable Audio Filter": self.__hidden_when("Copy Audio"),
+            "-af": self.__show_when("Enable Audio Filter"),
         }
+
+    def __show_when_gpu_decoding(self, key) -> Dict:
+        values = {
+            "display": 'hidden'
+        }
+        if self.get_setting("Enable Hardware Decoding") and self.get(key):
+            values = {}
+        return values
 
     def __show_when_cpu_decoding(self, key) -> Dict:
         values = {
@@ -214,7 +235,8 @@ class PluginStreamMapper(StreamMapper):
         self.setting = setting
         self.stream_types = []
 
-        self.stream_types.append("video")
+        if not setting.get("Copy Video"):
+            self.stream_types.append("video")
 
         if not setting.get("Copy Audio"):
             self.stream_types.append("audio")
@@ -245,6 +267,7 @@ class PluginStreamMapper(StreamMapper):
         :param stream_id:
         :return: dict
         """
+        
         stream_mapping = []
         stream_encoding = []
 
@@ -259,20 +282,35 @@ class PluginStreamMapper(StreamMapper):
                     "-disposition:v:0", "default"
                 ]
 
-                vf_param = []
-                def vf_adder(condition, key):
-                    if self.setting.get(condition):
-                        vf_param.append(
-                            key + self.setting.get(key)
-                        )
-                vf_adder("Enable Filter", "hqdn3d=")
-                vf_adder("Change Resolution", "scale=")
-                vf_adder("Change FPS", "fps=")
-                vf_adder("Crop Window", "crop=")
-                if len(vf_param) > 0:
-                    vf_param = [
-                        "-vf", ",".join(vf_param)
-                    ]
+                if self.setting.get("Enable Hardware Decoding"):
+                    # GPU filter chain using vpp_qsv
+                    vpp_qsv_parts = []
+                    if self.setting.get("Enable Video Filter"):
+                        vpp_qsv_parts.append("denoise=" + self.setting.get("vpp_qsv_denoise="))
+                    if self.setting.get("Change Resolution"):
+                        parts = self.setting.get("scale_qsv=").split(":")
+                        if len(parts) == 2:
+                            vpp_qsv_parts.append("w=" + parts[0] + ":h=" + parts[1])
+                    if len(vpp_qsv_parts) > 0:
+                        vf_param = ["-vf", "vpp_qsv=" + ":".join(vpp_qsv_parts)]
+                    else:
+                        vf_param = []
+                else:
+                    # CPU filter chain
+                    vf_param = []
+                    def vf_adder(condition, key):
+                        if self.setting.get(condition):
+                            vf_param.append(
+                                key + self.setting.get(key)
+                            )
+                    vf_adder("Enable Video Filter", "hqdn3d=")
+                    vf_adder("Change Resolution", "scale=")
+                    vf_adder("Change FPS", "fps=")
+                    vf_adder("Crop Window", "crop=")
+                    if len(vf_param) > 0:
+                        vf_param = [
+                            "-vf", ",".join(vf_param)
+                        ]
 
                 gq = str(self.setting.get("-global_quality"))
                 mr = str(self.setting.get("-maxrate")) + 'k'
@@ -301,10 +339,15 @@ class PluginStreamMapper(StreamMapper):
                     ]
                 else:
                     stream_encoding = [
-                        "-c:a:0", "aac",
-                        "-af", "highpass=200,lowpass=3000,afftdn",
-                        "-b:a", "192k", "-ac", "2"
+                        "-c:a:0", "aac"
                     ]
+                    if self.setting.get("Enable Audio Filter"):
+                        stream_encoding.extend(
+                            ["-af", self.setting.get("-af")]
+                        )
+                    stream_encoding.extend(
+                        ["-b:a", "192k", "-ac", "2"]
+                    )
                 self.found_audio = True
 
         else:
@@ -328,6 +371,7 @@ def on_worker_process(data: Dict):
     :param data:
     :return:
     """
+    
     abspath = data.get("file_in")
 
     # Get file probe
@@ -359,6 +403,10 @@ def on_worker_process(data: Dict):
     # Add faststart as an advanced option
     mapper.set_ffmpeg_advanced_options("-movflags", "+faststart")
 
+    # Enable QSV hardware decoding if configured
+    if settings.get("Enable Hardware Decoding"):
+        mapper.set_ffmpeg_advanced_options("-hwaccel", "qsv", "-hwaccel_output_format", "qsv")
+    
     ffmpeg_args = mapper.get_ffmpeg_args()
     logger.debug("ffmpeg_args: '{}'".format(ffmpeg_args))
 

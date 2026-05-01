@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.3.0
+- Added "Copy Video" option to skip video encoding and copy video stream unchanged
+- Added "Enable Hardware Decoding" option to toggle QSV hardware decoding (-hwaccel qsv)
+- Added GPU filter chain (vpp_qsv) with denoise and scale settings for hardware decoding mode
+- CPU filter fields (hqdn3d, scale, fps, crop) hidden when hardware decoding is enabled
+- FPS and Crop settings hidden when hardware decoding is enabled
+- Added "Enable Audio Filter" option to make audio filter (-af) configurable
+- Renamed "Enable Filter" to "Enable Video Filter" for clarity
+
 ## v0.2.0
 - Upgraded plugin architecture to use Probe/Parser/StreamMapper (matching Nvidia plugin)
 - Added proper stream mapping with first-track-only selection for video and audio
