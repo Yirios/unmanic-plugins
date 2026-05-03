@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.3.1
+- Fix -hwaccel qsv options placement: use generic_options instead of advanced_options so they go before -i
+
 ## v0.3.0
 - Added "Copy Video" option to skip video encoding and copy video stream unchanged
 - Added "Enable Hardware Decoding" option to toggle QSV hardware decoding (-hwaccel qsv)
