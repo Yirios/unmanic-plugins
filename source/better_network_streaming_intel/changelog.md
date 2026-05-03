@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.3.6
+- Fix repeat loop: return data instead of None when probe fails
+
 ## v0.3.5
 - Add GPU framerate adjustment via vpp_qsv (framerate=N)
 - Change FPS now visible in both CPU and HW decode modes

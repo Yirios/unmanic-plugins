@@ -429,7 +429,7 @@ def on_worker_process(data: Dict):
     probe = Probe(logger, allowed_mimetypes=["video", "audio"])
     if not probe.file(file_path=abspath):
         # File not able to be probed by ffprobe. The file is probably not a audio/video file.
-        return
+        return data
 
     # Configure settings object
     if data.get("library_id"):
