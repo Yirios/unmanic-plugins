@@ -74,10 +74,10 @@ class Settings(PluginSettings):
         "Enable Video Filter": True,
         "hqdn3d=": "luma_spatial=4.0",
         "vpp_qsv_denoise=": "40",
-        "scale_qsv=": "1920:-1",
         ## resolution config ##
         "Change Resolution": False,
         "scale=": "w=1920:h=-1",
+        "scale_qsv=": "1920:-1",
         ## fps config ##
         "Change FPS": False,
         "fps=": "fps=30",
@@ -405,7 +405,7 @@ def on_worker_process(data: Dict):
 
     # Enable QSV hardware decoding if configured
     if settings.get("Enable Hardware Decoding"):
-        mapper.set_ffmpeg_advanced_options("-hwaccel", "qsv", "-hwaccel_output_format", "qsv")
+        mapper.set_ffmpeg_generic_options("-hwaccel", "qsv", "-hwaccel_output_format", "qsv")
     
     ffmpeg_args = mapper.get_ffmpeg_args()
     logger.debug("ffmpeg_args: '{}'".format(ffmpeg_args))
