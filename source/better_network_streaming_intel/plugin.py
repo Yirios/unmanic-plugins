@@ -405,7 +405,7 @@ def on_worker_process(data: Dict):
 
     # Enable QSV hardware decoding if configured
     if settings.get("Enable Hardware Decoding"):
-        mapper.set_ffmpeg_generic_options("-hwaccel", "qsv", "-hwaccel_output_format", "qsv")
+        mapper.generic_options += ["-hwaccel", "qsv", "-hwaccel_output_format", "qsv"]
     
     ffmpeg_args = mapper.get_ffmpeg_args()
     logger.debug("ffmpeg_args: '{}'".format(ffmpeg_args))

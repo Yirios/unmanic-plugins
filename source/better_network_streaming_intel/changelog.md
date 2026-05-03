@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.3.2
+- Fix -hwaccel qsv options: bypass __build_args to avoid dedup of duplicate values
+
 ## v0.3.1
 - Fix -hwaccel qsv options placement: use generic_options instead of advanced_options so they go before -i
 
