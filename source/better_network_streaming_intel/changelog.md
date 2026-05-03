@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.3.5
+- Add GPU framerate adjustment via vpp_qsv (framerate=N)
+- Change FPS now visible in both CPU and HW decode modes
+
 ## v0.3.4
 - Hardcode -look_ahead 1 (forced on, removed from user settings)
 

@@ -81,6 +81,7 @@ class Settings(PluginSettings):
         ## fps config ##
         "Change FPS": False,
         "fps=": "fps=30",
+        "vpp_qsv_framerate=": "30",
         ## crop window ##
         "Crop Window": False,
         "crop=": "1920:804:0:138",
@@ -108,8 +109,8 @@ class Settings(PluginSettings):
             "hqdn3d=": self.__show_when_cpu_decoding("Enable Video Filter"),
             "scale=": self.__show_when_cpu_decoding("Change Resolution"),
             "fps=": self.__show_when_cpu_decoding("Change FPS"),
+            "vpp_qsv_framerate=": self.__show_when_gpu_decoding("Change FPS"),
             "crop=": self.__show_when_cpu_decoding("Crop Window"),
-            "Change FPS": self.__hidden_when("Enable Hardware Decoding"),
             "Crop Window": self.__hidden_when("Enable Hardware Decoding"),
             "-preset": {
                 "input_type":     "select",
@@ -330,6 +331,8 @@ class PluginStreamMapper(StreamMapper):
                         parts = self.setting.get("scale_qsv=").split(":")
                         if len(parts) == 2:
                             vpp_qsv_parts.append("w=" + parts[0] + ":h=" + parts[1])
+                    if self.setting.get("Change FPS"):
+                        vpp_qsv_parts.append("framerate=" + self.setting.get("vpp_qsv_framerate="))
                     if len(vpp_qsv_parts) > 0:
                         vf_param = ["-vf", "vpp_qsv=" + ":".join(vpp_qsv_parts)]
                     else:
