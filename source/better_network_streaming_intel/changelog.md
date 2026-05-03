@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.3.3
+- Add Rate Control Mode selector (CQP / VBR), mutually exclusive presentation
+- CQP mode: -global_quality without mixed bitrate params (fix quality control)
+- VBR mode: -b:v -maxrate -bufsize
+- Lookahead forced on, user adjustable depth
+- Default bitrate values lowered to ~1k range
+
 ## v0.3.2
 - Fix -hwaccel qsv options: bypass __build_args to avoid dedup of duplicate values
 

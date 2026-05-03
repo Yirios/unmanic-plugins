@@ -85,9 +85,13 @@ class Settings(PluginSettings):
         "Crop Window": False,
         "crop=": "1920:804:0:138",
         ## video encoding config ##
+        "Rate Control Mode": "CQP",
+        "-look_ahead": "1",
+        "-look_ahead_depth": "40",
         "-global_quality": 25,
-        "-maxrate": 3000,
-        "-bufsize": 6000,
+        "-b:v": "1000",
+        "-maxrate": 1000,
+        "-bufsize": 2000,
         "-preset": "veryslow",
         ## audio config ##
         "Copy Audio": True,
@@ -154,8 +158,25 @@ class Settings(PluginSettings):
                     },
                 ],
             },
+            "Rate Control Mode": {
+                "input_type":     "select",
+                "select_options": [
+                    {"value": "CQP", "label": "CQP (Constant Quality)"},
+                    {"value": "VBR", "label": "VBR (Bitrate)"},
+                ],
+            },
+            "-look_ahead_depth": {
+                "label": "lookahead frames",
+                "input_type":     "slider",
+                "slider_options": {
+                    "min":    4,
+                    "max":    100,
+                    "step":   1,
+                },
+            },
             "-global_quality": {
                 "label": "global_quality",
+                **self.__show_when_rate_control("CQP"),
                 "input_type":     "slider",
                 "slider_options": {
                     "min":    1,
@@ -163,11 +184,23 @@ class Settings(PluginSettings):
                     "step":   1
                 },
             },
-            "-maxrate": {
-                "label": "maxrate",
+            "-b:v": {
+                "label": "target bitrate",
+                **self.__show_when_rate_control("VBR"),
                 "input_type":     "slider",
                 "slider_options": {
-                    "min":    500,
+                    "min":    100,
+                    "max":    5000,
+                    "step":   100,
+                    "suffix": "k"
+                },
+            },
+            "-maxrate": {
+                "label": "maxrate",
+                **self.__show_when_rate_control("VBR"),
+                "input_type":     "slider",
+                "slider_options": {
+                    "min":    100,
                     "max":    5000,
                     "step":   100,
                     "suffix": "k"
@@ -175,9 +208,10 @@ class Settings(PluginSettings):
             },
             "-bufsize": {
                 "label": "bufsize",
+                **self.__show_when_rate_control("VBR"),
                 "input_type":     "slider",
                 "slider_options": {
-                    "min":    1000,
+                    "min":    200,
                     "max":    10000,
                     "step":   100,
                     "suffix": "k"
@@ -200,6 +234,12 @@ class Settings(PluginSettings):
             "display": 'hidden'
         }
         if not self.get_setting("Enable Hardware Decoding") and self.get(key):
+            values = {}
+        return values
+
+    def __show_when_rate_control(self, mode) -> Dict:
+        values = {"display": 'hidden'}
+        if self.get_setting("Rate Control Mode") == mode:
             values = {}
         return values
 
@@ -312,14 +352,24 @@ class PluginStreamMapper(StreamMapper):
                             "-vf", ",".join(vf_param)
                         ]
 
-                gq = str(self.setting.get("-global_quality"))
-                mr = str(self.setting.get("-maxrate")) + 'k'
-                bs = str(self.setting.get("-bufsize")) + 'k'
+                la = self.setting.get("-look_ahead")
+                ld = self.setting.get("-look_ahead_depth")
+
+                if self.setting.get("Rate Control Mode") == "VBR":
+                    br = str(self.setting.get("-b:v")) + 'k'
+                    mr = str(self.setting.get("-maxrate")) + 'k'
+                    bs = str(self.setting.get("-bufsize")) + 'k'
+                    rate_args = ["-b:v", br, "-maxrate", mr, "-bufsize", bs]
+                else:
+                    gq = str(self.setting.get("-global_quality"))
+                    rate_args = ["-global_quality", gq]
 
                 stream_encoding = [
                     *vf_param,
                     "-c:v:0", "hevc_qsv",
-                    "-global_quality", gq, "-maxrate", mr, "-bufsize", bs,
+                    "-look_ahead", la,
+                    "-look_ahead_depth", ld,
+                    *rate_args,
                     "-preset", self.setting.get("-preset"),
                 ]
 
