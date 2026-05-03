@@ -86,7 +86,6 @@ class Settings(PluginSettings):
         "crop=": "1920:804:0:138",
         ## video encoding config ##
         "Rate Control Mode": "CQP",
-        "-look_ahead": "1",
         "-look_ahead_depth": "40",
         "-global_quality": 25,
         "-b:v": "1000",
@@ -352,7 +351,6 @@ class PluginStreamMapper(StreamMapper):
                             "-vf", ",".join(vf_param)
                         ]
 
-                la = self.setting.get("-look_ahead")
                 ld = self.setting.get("-look_ahead_depth")
 
                 if self.setting.get("Rate Control Mode") == "VBR":
@@ -367,7 +365,7 @@ class PluginStreamMapper(StreamMapper):
                 stream_encoding = [
                     *vf_param,
                     "-c:v:0", "hevc_qsv",
-                    "-look_ahead", la,
+                    "-look_ahead", "1",
                     "-look_ahead_depth", ld,
                     *rate_args,
                     "-preset", self.setting.get("-preset"),

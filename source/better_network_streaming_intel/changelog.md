@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.3.4
+- Hardcode -look_ahead 1 (forced on, removed from user settings)
+
 ## v0.3.3
 - Add Rate Control Mode selector (CQP / VBR), mutually exclusive presentation
 - CQP mode: -global_quality without mixed bitrate params (fix quality control)
