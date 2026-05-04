@@ -1,48 +1,48 @@
 # Unmanic Plugins by Yiriso
 
-## Instructions
+A collection of [Unmanic](https://docs.unmanic.app/docs/) plugins for media transcoding, stream selection, and file management.
 
-This repository is aim to build a better transcoding workflow for network streaming.
-1. select streams
-2. transcode
-3. rename file
+## Plugins
 
-### Repo URL:
-<!-- Replace the below link with your own repo URL (found in the 'repo' git branch) -->
+### Better Network Streaming (intel) `v0.3.6`
+Hardware-accelerated video transcoding using Intel QSV (Quick Sync Video) with `hevc_qsv` encoder.
+
+- **Rate Control**: CQP (Constant Quality) or VBR (Bitrate) mode
+- **Hardware Decoding**: Toggle `-hwaccel qsv` with GPU filter chain (`vpp_qsv`)
+- **Video Filters**: Denoise, scale, framerate, crop (CPU and GPU filter chains)
+- **Audio**: Copy or AAC encode with optional audio filter (`-af`)
+- **Copy Video**: Option to skip video encoding entirely
+
+### Better Network Streaming (nvidia) `v0.3.3`
+Hardware-accelerated video transcoding using NVIDIA NVENC with `hevc_nvenc` encoder.
+
+- **Rate Control**: VBR with constant quality (`-cq`)
+- **Hardware Decoding**: Toggle CUDA hardware decoding with GPU filter chain
+- **Video Filters**: Denoise (`bilateral_cuda` / `hqdn3d`), scale, FPS, crop
+- **Audio**: Copy or AAC encode with optional audio filter
+- **Copy Video**: Option to skip video encoding entirely
+
+### Steam Selector `v0.1.2`
+Selectively include or exclude streams (video/audio/subtitle) based on codec, language, or title keywords.
+
+- Filter streams by codec name (e.g. `hevc`, `h264`)
+- Filter by language or title tag keywords
+- Copy all / copy selected / copy none per stream type
+
+### Move and Rename `v0.0.3`
+Basic file move and rename operations within the Unmanic pipeline.
+
+### ffprobe viewer `v0.0.2`
+View ffprobe output for files passing through the pipeline.
+
+## Repository URL
+
 ```
 https://raw.githubusercontent.com/Yirios/unmanic-plugins/repo/repo.json
 ```
 
+Follow the [Unmanic documentation](http://docs.unmanic.app/docs/plugins/adding_a_custom_plugin_repo/) to add this repository.
 
-Follow [Unmanic Documentation](http://docs.unmanic.app/docs/plugins/adding_a_custom_plugin_repo/) 
-to add this repo to your Unmanic installation.
+## License
 
-
-## Links
-
-[Unmanic Documentation](https://docs.unmanic.app/docs/)
-
-[License and Contribution](#license-and-contribution)
-
-
----
-## License and Contribution
-
-This projected is licensed under th GPL version 3. 
-
-Copyright (C) 2021 Josh Sunnex - All Rights Reserved
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
- 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-This project contains libraries imported from external authors.
-Please refer to the source of these libraries for more information on their respective licenses.
-
-See [CONTRIBUTING.md](docs/CONTRIBUTING.md) to learn how to contribute to Unmanic.
+GPL v3. See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for contribution guidelines.
